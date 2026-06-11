@@ -15,4 +15,35 @@ interface ProductData {
   capturedAt: string
   extractionSource: 'json_ld' | 'open_graph' | 'dom'
 }
-export type { ProductData }
+
+type SessionEventType =
+  | 'page_view'
+  | 'wishlist_add'
+  | 'wishlist_remove'
+  | 'dwell_milestone'
+  | 'scroll_milestone'
+
+interface SessionEvent {
+  type: SessionEventType
+  label: string
+  timestamp: string
+  value?: number
+}
+
+interface ShopperSession {
+  product: ProductData
+  /** Highest dwell milestone reached (ms) */
+  dwellMs: number
+  /** Max scroll depth reached (%) */
+  scrollDepthPct: number
+  wishlistStatus: 'saved' | 'not_saved' | 'unknown'
+  recentEvents: SessionEvent[]
+  updatedAt: string
+}
+
+export type {
+  ProductData,
+  SessionEvent,
+  SessionEventType,
+  ShopperSession,
+}

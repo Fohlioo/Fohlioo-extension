@@ -37,8 +37,8 @@ const SITE_DOM_CONFIG: Record<string, SiteDomConfig> = {
   },
   'asos.com': {
     sizes: {
-      container: '[data-testid="sizeSelect"], select[name*="size" i], #variantSelector',
-      option: 'option, button, label',
+      container: '[data-testid="variant-selector"], select#variantSelector',
+      option: 'option[data-testid^="size-"], option[value]',
     },
   },
   'zara.com': {
@@ -71,6 +71,8 @@ const GENERIC_SIZE_OPTION_SELECTORS = [
   'li',
   'option',
 ]
+
+const SIZE_WAIST_LENGTH = /^W\d+\s+L\d+(\s+\d+"?)?$/i
 
 const SIZE_LABEL =
   /^(xxs|xs|s|m|l|xl|xxl|2xs|3xs|2xl|3xl|4xl|one\s*size|os)$/i
@@ -141,6 +143,8 @@ function getSiteKey (hostname: string): string | null {
   }
   return null
 }
+
+export { getSiteKey }
 
 function textContent (el: Element | null): string | null {
   const text = el?.textContent?.trim()
@@ -229,6 +233,7 @@ function isValidSizeLabel (label: string): boolean {
   if (SIZE_NOISE.test(trimmed)) return false
   if (SIZE_LABEL.test(trimmed)) return true
   if (SIZE_NUMERIC.test(trimmed)) return true
+  if (SIZE_WAIST_LENGTH.test(trimmed)) return true
   return false
 }
 
@@ -279,13 +284,61 @@ function readSizeFromElement (el: Element): string | null {
 
   for (const candidate of candidates) {
     if (!candidate) continue
-    const label = candidate
+    let label = candidate
       .replace(/^size\s*[:\-]?\s*/i, '')
+      .replace(/\s*-\s*out of stock\s*$/i, '')
       .trim()
     if (isValidSizeLabel(label)) return normalizeSizeLabel(label)
   }
 
+  if (el.tagName === 'OPTION') {
+    return readSizeFromOption(el as HTMLOptionElement)
+  }
+
   return null
+}
+
+function normalizeAsosSizeOption (raw: string): string | null {
+  const cleaned = raw
+    .replace(/\s*-\s*out of stock\s*$/i, '')
+    .replace(/^size\s*[:\-]?\s*/i, '')
+    .trim()
+
+  if (!cleaned || /please select/i.test(cleaned)) return null
+  if (SIZE_NOISE.test(cleaned)) return null
+
+  return cleaned
+}
+
+function readSizeFromOption (option: HTMLOptionElement): string | null {
+  const value = option.value?.trim()
+  if (!value) return null
+
+  const raw =
+    option.getAttribute('aria-label')?.trim() ??
+    option.textContent?.trim() ??
+    ''
+
+  return normalizeAsosSizeOption(raw)
+}
+
+/**
+ * ASOS PDP — sizes live in select#variantSelector inside [data-testid="variant-selector"].
+ * Each option: data-testid="size-0", aria-label="W28 L32", value=variant id.
+ */
+function extractAsosSizes (): string[] {
+  const select = document.querySelector<HTMLSelectElement>(
+    '[data-testid="variant-selector"] select#variantSelector, select#variantSelector'
+  )
+  if (!select) return []
+
+  const sizes: string[] = []
+  for (const option of select.querySelectorAll('option')) {
+    const size = readSizeFromOption(option)
+    if (size) sizes.push(size)
+  }
+
+  return [...new Set(sizes)]
 }
 
 /** COS / H&M group — buttons use data-testid="size-selector-button-XS" */
@@ -303,6 +356,9 @@ function extractHmGroupSizes (): string[] {
 function extractSizesFromDom (): string[] {
   const hmGroupSizes = extractHmGroupSizes()
   if (hmGroupSizes.length > 0) return hmGroupSizes
+
+  const asosSizes = extractAsosSizes()
+  if (asosSizes.length > 0) return asosSizes
 
   const siteKey = getSiteKey(window.location.hostname)
   const siteConfig = siteKey ? SITE_DOM_CONFIG[siteKey] : undefined
