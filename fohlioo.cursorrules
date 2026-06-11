@@ -1,0 +1,783 @@
+# Fohlioo — Cursor Project Rules
+# Complete project context for AI-assisted development
+# Place this file at the root of every Fohlioo repository
+
+---
+
+## WHAT THIS PROJECT IS
+
+Fohlioo is a two-sided AI fashion intelligence platform with three components:
+
+1. **Chrome browser extension** (Manifest V3, TypeScript) — captures real cross-brand shopper behaviour passively as shoppers browse fashion sites
+2. **Web app** (React + TypeScript + Tailwind + Vite) — shopper intelligence home: curated feed, style profile, wardrobe, budget tracker
+3. **Brand portal** (same web app, separate route) — analytics dashboard for fashion brands: buyer segments, demand forecasting, campaign analytics, pricing intelligence
+
+The extension is the data engine. Without it, neither the shopper product nor the brand intelligence portal has anything to work with. It is the most critical component to build correctly.
+
+**Slogan:** Better choices. Smarter collections.
+**Domain:** fohlioo.com
+**Contact:** hello@fohlioo.co
+
+---
+
+## THE CORE PRODUCT THESIS
+
+The browser extension captures what shoppers actually do across every fashion site they visit — Cos, Net-a-Porter, Toteme, Zara, ASOS, H&M, etc. This cross-brand behavioural data is converted into two things simultaneously:
+
+- **For shoppers:** a personalised style profile, wardrobe gap detection, budget intelligence, regret detection, curated feed
+- **For brands:** buyer segment intelligence, demand forecasting, campaign analytics, pricing intelligence
+
+No direct competitor captures cross-brand shopper behaviour at this level. Phia (phia.com) does price comparison — that is a different problem. WGSN, EDITED, Heuritech are B2B only with no consumer product. Fohlioo is structurally new.
+
+---
+
+## TECH STACK — USE EXACTLY THESE
+
+### Extension
+- **Framework:** Plasmo (docs.plasmo.com) — React + TypeScript wrapper for Chrome extensions
+- **Language:** TypeScript throughout — no plain JavaScript files
+- **Manifest:** V3 only — never use MV2 patterns
+- **Storage:** chrome.storage.local for session state, never localStorage
+
+### Web App + Brand Portal
+- **Framework:** React 18 + TypeScript + Vite
+- **Styling:** Tailwind CSS — utility classes only, no inline styles, no CSS modules
+- **Routing:** React Router v6
+- **State:** Zustand for global state, React Query (TanStack Query) for server state
+- **Deployment:** Vercel
+
+### Backend API
+- **Runtime:** Node.js
+- **Framework:** Hono — lightweight, edge-compatible, not Express
+- **Deployment:** Railway
+- **Language:** TypeScript
+
+### Database
+- **Primary:** Supabase (PostgreSQL)
+- **Vector search:** pgvector — already enabled in Supabase, used for style matching
+- **Auth:** Supabase Auth
+- **Real-time:** Supabase Realtime for live portal updates
+
+### AI / ML
+- **Embeddings:** OpenAI text-embedding-3-small — for product and style matching
+- **Fast LLM tasks:** Claude Haiku — search intent, regret detection
+- **Deep LLM tasks:** Claude Sonnet — brand insights, complex analysis
+- **Segmentation (Phase 1):** Rule-based threshold engine — NO ML models yet
+- **Segmentation (Phase 2):** K-means clustering on 30+ event profiles
+
+### Product Catalogue
+- **Source:** AWIN affiliate feed — 200+ fashion brands, structured product data
+- **Why:** Legal product data with affiliate revenue from day one
+
+### Analytics
+- **Tool:** PostHog — product analytics, feature flags, session replay
+
+---
+
+## SUPABASE SCHEMA — BUILD THIS EXACTLY
+
+```sql
+-- Enable pgvector
+create extension if not exists vector;
+
+-- Shoppers
+create table shoppers (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz default now(),
+  email text unique,
+  segment text check (segment in (
+    'investment_dresser', 'trend_chaser', 
+    'quiet_minimalist', 'brand_loyalist', 'unclassified'
+  )),
+  segment_confidence float default 0,
+  event_count integer default 0,
+  last_active_at timestamptz
+);
+
+-- Sessions
+create table sessions (
+  id uuid primary key default gen_random_uuid(),
+  shopper_id uuid references shoppers(id) on delete cascade,
+  started_at timestamptz default now(),
+  ended_at timestamptz,
+  brand_domain text,
+  page_count integer default 0
+);
+
+-- Raw events (everything the extension captures)
+create table events (
+  id uuid primary key default gen_random_uuid(),
+  shopper_id uuid references shoppers(id) on delete cascade,
+  session_id uuid references sessions(id) on delete cascade,
+  event_type text not null check (event_type in (
+    'page_view', 'wishlist_add', 'wishlist_remove',
+    'add_to_cart', 'cart_abandon', 'size_selected',
+    'colour_selected', 'review_section_view',
+    'size_guide_view', 'purchase_confirmed',
+    'return_initiated', 'scroll_milestone', 'dwell_milestone'
+  )),
+  product_url text,
+  product_name text,
+  brand text,
+  price numeric,
+  original_price numeric,
+  currency text default 'GBP',
+  category text,
+  colour text,
+  dwell_time_ms integer,
+  scroll_depth_pct float,
+  timestamp timestamptz default now(),
+  metadata jsonb default '{}'
+);
+
+-- Products catalogue (from AWIN + page captures)
+create table products (
+  id uuid primary key default gen_random_uuid(),
+  url text unique not null,
+  name text,
+  brand text,
+  price numeric,
+  currency text default 'GBP',
+  category text,
+  colour text,
+  image_url text,
+  embedding vector(1536),  -- OpenAI text-embedding-3-small dimension
+  last_seen_at timestamptz default now(),
+  created_at timestamptz default now()
+);
+
+-- Computed shopper signals (derived from raw events, updated periodically)
+create table shopper_signals (
+  shopper_id uuid primary key references shoppers(id) on delete cascade,
+  avg_consideration_arc_days float,
+  dwell_time_p75_ms integer,
+  return_rate float,
+  full_price_rate float,
+  brand_hhi_index float,
+  colour_palette_entropy float,
+  purchase_frequency_30d float,
+  avg_order_value numeric,
+  unique_brands_30d integer,
+  sale_browse_ratio float,
+  updated_at timestamptz default now()
+);
+
+-- Segment history (track how segments evolve over time)
+create table segment_history (
+  id uuid primary key default gen_random_uuid(),
+  shopper_id uuid references shoppers(id) on delete cascade,
+  segment text,
+  confidence float,
+  computed_at timestamptz default now(),
+  event_count_at_time integer
+);
+
+-- Row Level Security
+alter table shoppers enable row level security;
+alter table sessions enable row level security;
+alter table events enable row level security;
+alter table shopper_signals enable row level security;
+alter table segment_history enable row level security;
+
+-- Shoppers can only access their own data
+create policy "shoppers_own_data" on shoppers
+  for all using (auth.uid() = id);
+
+create policy "sessions_own_data" on sessions
+  for all using (auth.uid() = shopper_id);
+
+create policy "events_own_data" on events
+  for all using (auth.uid() = shopper_id);
+
+-- Index for performance
+create index on events (shopper_id, timestamp desc);
+create index on events (product_url, shopper_id);
+create index on events (brand, shopper_id);
+create index on products using ivfflat (embedding vector_cosine_ops)
+  with (lists = 100);
+```
+
+---
+
+## EXTENSION ARCHITECTURE
+
+### File structure (Plasmo)
+```
+fohlioo-extension/
+  contents/
+    capture.ts        ← main content script, runs on all fashion sites
+    capture.css       ← minimal styles for any injected UI
+  background.ts       ← service worker, message passing, API calls
+  popup.tsx           ← popup UI (Phase 2 — skeleton only in Phase 1)
+  lib/
+    extractor.ts      ← JSON-LD and OG extraction logic
+    events.ts         ← event type definitions and builders
+    signals.ts        ← derived signal calculations
+    storage.ts        ← chrome.storage.local helpers
+    api.ts            ← calls to Fohlioo backend API
+  types/
+    index.ts          ← all shared TypeScript types
+  package.json
+  .env.development    ← PLASMO_PUBLIC_API_URL=http://localhost:3000
+  .env.production     ← PLASMO_PUBLIC_API_URL=https://api.fohlioo.com
+```
+
+### Target sites (manifest matches)
+The extension runs on these domains only — never on non-fashion sites:
+```json
+"matches": [
+  "https://*.cos.com/*",
+  "https://*.net-a-porter.com/*",
+  "https://*.asos.com/*",
+  "https://*.zara.com/*",
+  "https://*.toteme-studio.com/*",
+  "https://*.reiss.com/*",
+  "https://*.stories.com/*",
+  "https://*.arket.com/*",
+  "https://*.matchesfashion.com/*",
+  "https://*.farfetch.com/*",
+  "https://*.mytheresa.com/*",
+  "https://*.selfridges.com/*",
+  "https://*.harveynichols.com/*",
+  "https://*.brownsfashion.com/*",
+  "https://*.theoutnet.com/*",
+  "https://*.mrporter.com/*",
+  "https://*.ssense.com/*",
+  "https://*.endclothing.com/*",
+  "https://*.hm.com/*",
+  "https://*.mango.com/*"
+]
+```
+
+### Permissions required (manifest.json)
+```json
+{
+  "permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": ["<all_urls>"]
+}
+```
+
+---
+
+## FULL DATA CAPTURE TAXONOMY
+
+These are every signal the extension must capture. Build them in this priority order.
+
+### Priority 1 — Build in Phase 1 (week 1-2)
+
+**page_view**
+Fires on every product page load and SPA navigation.
+Payload: url, name, brand, price, original_price, currency, category, colour, image_url
+Source: JSON-LD `application/ld+json` → Open Graph fallback → DOM fallback
+
+**dwell_time_ms**
+Total milliseconds on page. Use Page Visibility API (document.visibilitychange) plus performance.now() delta. Accumulate across visibility changes — shopper may switch tabs.
+Fire a dwell_milestone event at: 15s, 30s, 60s, 90s, 120s, 180s
+
+**scroll_depth_pct**
+Maximum scroll percentage reached. Throttle listener to every 250ms.
+Fire a scroll_milestone event at: 25%, 50%, 75%, 90%
+
+**return_visit_count**
+How many times this shopper has visited this exact product URL.
+Store URL history in chrome.storage.local. Check on every page_view.
+
+**tab_open_count**
+Number of Fohlioo-tracked fashion site tabs open simultaneously.
+Use chrome.tabs.query in background.ts — content script sends message to background.
+
+### Priority 2 — Build in Phase 1 (week 2-3)
+
+**wishlist_add / wishlist_remove**
+Detect via DOM MutationObserver on elements with:
+- aria-label containing "save", "wishlist", "favourite", "heart"
+- class names containing "wishlist", "favourite", "save", "heart"
+- data attributes: data-action="wishlist", data-wishlist
+Fire wishlist_add on activation, wishlist_remove on deactivation.
+
+**add_to_cart**
+Detect via:
+1. Network request interception — intercept XHR/fetch calls to URLs containing "/cart/add", "/basket/add", "/bag/add"
+2. DOM fallback — MutationObserver on cart count elements changing
+3. Button click fallback — click listener on buttons with "add to cart", "add to bag" text
+
+**size_selected**
+Listen for change events on select elements and click events on size buttons.
+Capture: size value selected, whether it triggered an add_to_cart within 5 seconds.
+
+**colour_selected**
+Listen for click events on colour swatch elements.
+Capture: colour name or hex value.
+
+**purchase_confirmed**
+Detect order confirmation pages via URL pattern matching:
+- URL contains: /order-confirmation, /order-complete, /thank-you, /checkout/success, /order/success, /confirmation
+- Page title contains: "order confirmed", "thank you for your order", "order complete"
+Extract order value from page if possible.
+
+### Priority 3 — Build in Phase 2
+
+**review_section_view** — Intersection Observer on review containers
+**size_guide_view** — click listener on size guide triggers
+**cart_abandon** — cart add without purchase within session
+**return_initiated** — return URL detection + Gmail API (Phase 2)
+**outbound_compare_click** — leaving to a competitor site
+
+---
+
+## DATA EXTRACTION — HOW TO READ JSON-LD
+
+Every major fashion site embeds structured product data for SEO. Read it before any DOM scraping.
+
+```typescript
+function extractFromJsonLd(): Partial<ProductData> {
+  const scripts = document.querySelectorAll('script[type="application/ld+json"]')
+  
+  for (const script of scripts) {
+    try {
+      const raw = JSON.parse(script.textContent || "")
+      // Data may be array or single object
+      const items = Array.isArray(raw) ? raw : [raw]
+      const product = items.find(item => 
+        item["@type"] === "Product" || 
+        item["@type"] === "IndividualProduct"
+      )
+      if (!product) continue
+
+      return {
+        name: product.name ?? null,
+        brand: product.brand?.name ?? product.brand ?? null,
+        price: product.offers?.price 
+          ? parseFloat(String(product.offers.price)) 
+          : null,
+        originalPrice: product.offers?.highPrice
+          ? parseFloat(String(product.offers.highPrice))
+          : null,
+        currency: product.offers?.priceCurrency ?? null,
+        category: product.category ?? null,
+        colour: product.color ?? null,
+        image: Array.isArray(product.image) 
+          ? product.image[0] 
+          : product.image ?? null,
+      }
+    } catch {
+      continue
+    }
+  }
+  return {}
+}
+```
+
+### Open Graph fallback
+```typescript
+function extractFromOG(): Partial<ProductData> {
+  const get = (prop: string) =>
+    document.querySelector(`meta[property="${prop}"]`)
+      ?.getAttribute("content") ?? null
+
+  return {
+    name:     get("og:title"),
+    image:    get("og:image"),
+    price:    get("product:price:amount") 
+                ? parseFloat(get("product:price:amount")!) 
+                : null,
+    currency: get("product:price:currency"),
+    brand:    get("og:site_name"),
+  }
+}
+```
+
+### SPA navigation handling
+Zara, ASOS, and many others are React apps — the URL changes without a full page reload. Always handle this:
+
+```typescript
+let lastUrl = location.href
+const navObserver = new MutationObserver(() => {
+  if (location.href !== lastUrl) {
+    lastUrl = location.href
+    // Wait 800ms for React to render the new page
+    setTimeout(() => capturePageView(), 800)
+  }
+})
+navObserver.observe(document.body, { subtree: true, childList: true })
+```
+
+---
+
+## BACKGROUND SERVICE WORKER
+
+The background script handles:
+1. Message passing from content scripts
+2. API calls to the Fohlioo backend (content scripts cannot make cross-origin requests directly in MV3)
+3. Tab tracking for tab_open_count
+4. Session management
+
+```typescript
+// background.ts
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "SEND_EVENT") {
+    sendEventToApi(message.data)
+      .then(() => sendResponse({ success: true }))
+      .catch(err => sendResponse({ success: false, error: err.message }))
+    return true // keep channel open for async response
+  }
+  
+  if (message.type === "GET_TAB_COUNT") {
+    chrome.tabs.query({}, tabs => {
+      const fashionTabCount = tabs.filter(tab => 
+        tab.url && isFashionSite(tab.url)
+      ).length
+      sendResponse({ count: fashionTabCount })
+    })
+    return true
+  }
+})
+```
+
+---
+
+## API DESIGN — BACKEND ENDPOINTS
+
+```
+POST   /api/v1/events          ← receive events from extension
+POST   /api/v1/shoppers        ← create shopper profile
+GET    /api/v1/shoppers/:id    ← get shopper profile + segment
+GET    /api/v1/feed            ← get curated product feed for shopper
+POST   /api/v1/products/embed  ← batch embed AWIN products (internal)
+GET    /api/v1/brands/:id      ← brand portal data (Phase 2)
+```
+
+### Event ingestion endpoint
+```typescript
+// POST /api/v1/events
+// Validates, enriches, and stores events from the extension
+
+interface IngestEventBody {
+  shopper_id: string
+  session_id: string
+  event_type: EventType
+  product_url?: string
+  brand?: string
+  price?: number
+  original_price?: number
+  currency?: string
+  category?: string
+  colour?: string
+  dwell_time_ms?: number
+  scroll_depth_pct?: number
+  timestamp: string
+  metadata?: Record<string, unknown>
+}
+```
+
+---
+
+## SEGMENTATION ENGINE — PHASE 1 RULES
+
+The rule-based engine runs server-side, not in the extension. It is triggered after every event ingestion and recomputes the shopper's segment.
+
+```typescript
+interface SegmentResult {
+  segment: 'investment_dresser' | 'trend_chaser' | 
+           'quiet_minimalist' | 'brand_loyalist' | 'unclassified'
+  confidence: number // 0-1
+  event_count: number
+  signals_used: string[]
+}
+
+function classifyShopper(signals: ShopperSignals): SegmentResult {
+  const {
+    avg_consideration_arc_days,
+    dwell_time_p75_ms,
+    return_rate,
+    full_price_rate,
+    brand_hhi_index,
+    colour_palette_entropy,
+    purchase_frequency_30d,
+    avg_order_value,
+    event_count
+  } = signals
+
+  // Require minimum events before classifying
+  if (event_count < 10) {
+    return { segment: 'unclassified', confidence: 0, event_count, signals_used: [] }
+  }
+
+  // Investment Dresser
+  if (
+    avg_consideration_arc_days > 7 &&
+    dwell_time_p75_ms > 90000 &&
+    return_rate < 0.12 &&
+    full_price_rate > 0.75
+  ) {
+    return {
+      segment: 'investment_dresser',
+      confidence: calculateConfidence([
+        avg_consideration_arc_days / 21,
+        (90000 / dwell_time_p75_ms) > 1 ? 1 : 90000 / dwell_time_p75_ms,
+        1 - return_rate,
+        full_price_rate
+      ]),
+      event_count,
+      signals_used: ['consideration_arc', 'dwell_time', 'return_rate', 'full_price_rate']
+    }
+  }
+
+  // Brand Loyalist
+  if (brand_hhi_index > 0.65 && full_price_rate > 0.65) {
+    return {
+      segment: 'brand_loyalist',
+      confidence: calculateConfidence([brand_hhi_index, full_price_rate]),
+      event_count,
+      signals_used: ['brand_hhi', 'full_price_rate']
+    }
+  }
+
+  // Quiet Minimalist
+  if (colour_palette_entropy < 0.3 && return_rate < 0.08) {
+    return {
+      segment: 'quiet_minimalist',
+      confidence: calculateConfidence([1 - colour_palette_entropy, 1 - return_rate]),
+      event_count,
+      signals_used: ['colour_entropy', 'return_rate']
+    }
+  }
+
+  // Trend Chaser
+  if (
+    avg_consideration_arc_days < 3 &&
+    purchase_frequency_30d > 2 &&
+    return_rate > 0.25
+  ) {
+    return {
+      segment: 'trend_chaser',
+      confidence: calculateConfidence([
+        1 - (avg_consideration_arc_days / 3),
+        purchase_frequency_30d / 5,
+        return_rate
+      ]),
+      event_count,
+      signals_used: ['consideration_arc', 'purchase_frequency', 'return_rate']
+    }
+  }
+
+  return { segment: 'unclassified', confidence: 0, event_count, signals_used: [] }
+}
+
+function calculateConfidence(factors: number[]): number {
+  const avg = factors.reduce((a, b) => a + b, 0) / factors.length
+  return Math.min(Math.max(avg, 0), 1)
+}
+```
+
+---
+
+## COMPUTED SIGNALS — HOW TO DERIVE THEM
+
+These functions run over the raw events table to produce the shopper_signals row.
+
+```typescript
+// Consideration arc — days between first page_view and purchase_confirmed for same product
+async function getConsiderationArc(shopperId: string): Promise<number> {
+  const { data } = await supabase.rpc('compute_consideration_arc', { 
+    p_shopper_id: shopperId 
+  })
+  return data ?? 0
+}
+
+// Brand HHI — Herfindahl-Hirschman Index on brand distribution
+// HHI = sum of (brand_share)^2 across all brands
+// Score near 1 = highly concentrated (Brand Loyalist)
+// Score near 0 = highly distributed
+function computeBrandHHI(brandCounts: Record<string, number>): number {
+  const total = Object.values(brandCounts).reduce((a, b) => a + b, 0)
+  if (total === 0) return 0
+  return Object.values(brandCounts)
+    .map(count => Math.pow(count / total, 2))
+    .reduce((a, b) => a + b, 0)
+}
+
+// Colour palette entropy — Shannon entropy on colour distribution
+// Low entropy = consistent palette (Quiet Minimalist)
+// High entropy = varied palette (Trend Chaser)
+function computeColourEntropy(colourCounts: Record<string, number>): number {
+  const total = Object.values(colourCounts).reduce((a, b) => a + b, 0)
+  if (total === 0) return 0
+  return -Object.values(colourCounts)
+    .map(count => {
+      const p = count / total
+      return p > 0 ? p * Math.log2(p) : 0
+    })
+    .reduce((a, b) => a + b, 0)
+}
+
+// Full price rate — proportion of purchases at original price
+function computeFullPriceRate(events: Event[]): number {
+  const purchases = events.filter(e => e.event_type === 'purchase_confirmed')
+  if (purchases.length === 0) return 0
+  const fullPrice = purchases.filter(e => 
+    !e.original_price || e.price >= e.original_price * 0.95
+  )
+  return fullPrice.length / purchases.length
+}
+```
+
+---
+
+## THE FOUR SHOPPER SEGMENTS
+
+Always use these exact names and descriptions in code, copy, and UI.
+
+### Investment Dresser
+- Considers for 7-21 days before buying
+- Dwell time P75 above 90 seconds
+- Return rate under 12%
+- Full price rate above 80%
+- Average order value above £200
+- Revisits same product 3-5 times
+- Reads reviews and material sections
+
+### Trend Chaser
+- Session to purchase under 72 hours
+- Purchases 2+ times per month
+- Return rate 28-45%
+- Over 50% of browsing on discounted items
+- Dwell time P75 under 40 seconds
+- Average order value under £160
+
+### Quiet Minimalist
+- Colour palette entropy under 0.3 (neutral palette: black, white, cream, camel, stone)
+- Return rate under 8%
+- Low category diversity
+- Full price rate 65-75%
+- Consideration arc 5-14 days
+
+### Brand Loyalist
+- Brand HHI above 0.65
+- Under 5 unique brands visited in 30 days
+- Full price rate 70-80%
+- Return rate 8-14%
+- Slow trend response speed
+
+---
+
+## CODING CONVENTIONS — FOLLOW THESE EXACTLY
+
+### TypeScript
+- Strict mode always — no `any` types
+- Define all interfaces in `types/index.ts`
+- Use `type` for unions, `interface` for objects
+- Always handle null/undefined explicitly
+
+### Naming
+- Files: kebab-case (`product-capture.ts`)
+- Components: PascalCase (`StyleProfile.tsx`)
+- Functions: camelCase (`capturePageView`)
+- Constants: SCREAMING_SNAKE_CASE (`MAX_DWELL_MS`)
+- Database columns: snake_case (`shopper_id`, `event_type`)
+- TypeScript types: PascalCase (`ProductData`, `ShopperSignal`)
+
+### Extension-specific rules
+- Never use `document.cookie` — no cookie access
+- Never capture data outside fashion site matches
+- Always use `chrome.storage.local` not `localStorage`
+- Always check if on a product page before firing events
+- Throttle all scroll and mutation observers — never fire on every pixel
+- SPA navigation detection is mandatory — use MutationObserver on document.body
+- Always send events through background.ts, never directly from content script
+
+### Error handling
+- Never let extension errors surface to the user
+- Wrap all content script logic in try/catch
+- Log errors to chrome.storage.local for debugging, not console.error in production
+- API failures must not block the UI — fail silently and queue for retry
+
+### Privacy
+- Extension only runs on whitelisted fashion site domains
+- No data captured outside product pages
+- No cookies, no fingerprinting
+- Only capture fashion-relevant signals — never intercept unrelated network requests
+- Never log personally identifiable information to console
+
+### Environment variables in Plasmo
+- Use `process.env.PLASMO_PUBLIC_*` prefix for variables exposed to content scripts
+- Never expose API keys in content scripts
+
+---
+
+## CURRENT BUILD PHASE
+
+**Phase 1 — what exists:**
+- Plasmo extension scaffolded
+- First content script with JSON-LD extraction
+
+**Phase 1 — what to build next (in order):**
+1. Complete `lib/extractor.ts` — JSON-LD + OG + DOM fallback extraction
+2. Complete `contents/capture.ts` — dwell time, scroll depth, SPA nav handling
+3. Supabase schema — run all SQL above in Supabase dashboard
+4. Backend API in Hono — single POST /api/v1/events endpoint
+5. `background.ts` — message passing + API calls
+6. `lib/storage.ts` — chrome.storage.local session management
+7. Wishlist and cart detection (site-by-site)
+8. Rule-based segmentation engine
+9. AWIN catalogue integration
+10. OpenAI embedding batch job
+
+**Phase 2 (after 500 MAU):**
+- Web app with curated feed
+- Shopper style profile page
+- Self-hosted HuggingFace embeddings
+- Brand portal read-only
+
+---
+
+## FASHION SITES — KNOWN DATA CHARACTERISTICS
+
+Sites confirmed to have clean JSON-LD (test first):
+- cos.com — clean Product JSON-LD
+- net-a-porter.com — clean Product JSON-LD
+- asos.com — React SPA, has JSON-LD but needs SPA handling
+- toteme-studio.com — clean JSON-LD
+- arket.com — clean JSON-LD
+
+Sites with partial or no JSON-LD (need DOM fallback):
+- zara.com — React SPA, limited JSON-LD, needs DOM scraping
+- stories.com — minimal structured data
+- hm.com — some JSON-LD but inconsistent
+
+DOM fallback selectors to research per site when JSON-LD is absent:
+- Product name: `h1`, `[data-product-name]`, `.product-title`
+- Price: `[data-price]`, `.product-price`, `[itemprop="price"]`
+- Brand: `[data-brand]`, `.product-brand`, `[itemprop="brand"]`
+
+---
+
+## WHAT NOT TO DO
+
+- Do not use Express — use Hono
+- Do not use any MV2 patterns in the extension
+- Do not use localStorage in the extension — use chrome.storage.local
+- Do not make API calls directly from content scripts — use background.ts as intermediary
+- Do not build ML models in Phase 1 — rule-based segmentation only
+- Do not add visual components to the extension popup in Phase 1 — focus on data capture
+- Do not capture data on non-fashion sites — respect the match list
+- Do not intercept Gmail or any non-fashion network requests
+- Do not use CSS frameworks in content scripts — style leakage into host page
+- Do not store shopper data in plain text — always go through Supabase RLS
+- Do not build the web app before the extension data pipeline is working
+
+---
+
+## NOTES FOR CURSOR
+
+When generating code for this project:
+- Always use the exact tech stack listed above — never suggest alternatives unprompted
+- The extension is built with Plasmo — always follow Plasmo patterns, not raw Chrome extension patterns
+- Always generate TypeScript with strict typing
+- Database queries always go through the Supabase client — never raw SQL from the frontend
+- The segmentation engine is server-side only — never run it in the extension
+- Tailwind classes only for styling — no inline styles, no CSS modules
+- When building API endpoints, always validate the request body before touching the database
+- All extension-to-background communication uses chrome.runtime.sendMessage with typed message objects
+
+When asked to build a new feature, always ask: does this require visual design? If yes, flag it as blocked pending designer handover. If no, build it.

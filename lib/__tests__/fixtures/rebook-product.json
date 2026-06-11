@@ -1,0 +1,113 @@
+
+{
+    "@context": "http://schema.org/",
+    "@type": "Product",
+    "name": "Wardrobe Essentials Women's T-Shirt",
+    "url": "https:\/\/www.reebok.eu\/en-gb\/products\/wardrobe-essentials-t-shirt-100253807-4519","image": [
+      "\/\/www.reebok.eu\/cdn\/shop\/files\/100253807_154877_FR_Model_eCom.jpg?v=1770913984\u0026width=1920"
+    ],"description": "Meet the daily driver that makes getting dressed the easiest part of your day. The 100% cotton jersey provides a soft, breathable feel and a clean, effortless drape. In a soft Gentle Pink, it delivers a sharp, understated look for your off-duty rotation.",
+    "sku": "VR00250392",
+    "brand": {
+      "@type": "Brand",
+      "name": "Reebok"
+    },
+    "offers": [{
+          "@type" : "Offer",
+          "sku": "VR00250387","gtin13": 1200179488060,"availability" : "http://schema.org/InStock",
+          "itemCondition" : "http://schema.org/NewCondition",
+          "price" : 30.0,
+          "priceCurrency" : "GBP",
+          "url" : "https:\/\/www.reebok.eu\/en-gb\/products\/wardrobe-essentials-t-shirt-100253807-4519?variant=56698438254940",
+          "sizeSpecification": {
+            "@type": "SizeSpecification",
+            "size": "2XS",
+            "sizeSystem": "UK"
+          }
+          
+        },
+{
+          "@type" : "Offer",
+          "sku": "VR00250388","gtin13": 1200179488084,"availability" : "http://schema.org/InStock",
+          "itemCondition" : "http://schema.org/NewCondition",
+          "price" : 30.0,
+          "priceCurrency" : "GBP",
+          "url" : "https:\/\/www.reebok.eu\/en-gb\/products\/wardrobe-essentials-t-shirt-100253807-4519?variant=56698438287708",
+          "sizeSpecification": {
+            "@type": "SizeSpecification",
+            "size": "XS",
+            "sizeSystem": "UK"
+          }
+          
+        },
+{
+          "@type" : "Offer",
+          "sku": "VR00250389","gtin13": 1200179488107,"availability" : "http://schema.org/InStock",
+          "itemCondition" : "http://schema.org/NewCondition",
+          "price" : 30.0,
+          "priceCurrency" : "GBP",
+          "url" : "https:\/\/www.reebok.eu\/en-gb\/products\/wardrobe-essentials-t-shirt-100253807-4519?variant=56698438320476",
+          "sizeSpecification": {
+            "@type": "SizeSpecification",
+            "size": "S",
+            "sizeSystem": "UK"
+          }
+          
+        },
+{
+          "@type" : "Offer",
+          "sku": "VR00250390","gtin13": 1200179488121,"availability" : "http://schema.org/InStock",
+          "itemCondition" : "http://schema.org/NewCondition",
+          "price" : 30.0,
+          "priceCurrency" : "GBP",
+          "url" : "https:\/\/www.reebok.eu\/en-gb\/products\/wardrobe-essentials-t-shirt-100253807-4519?variant=56698438353244",
+          "sizeSpecification": {
+            "@type": "SizeSpecification",
+            "size": "M",
+            "sizeSystem": "UK"
+          }
+          
+        },
+{
+          "@type" : "Offer",
+          "sku": "VR00250391","gtin13": 1200179645111,"availability" : "http://schema.org/InStock",
+          "itemCondition" : "http://schema.org/NewCondition",
+          "price" : 30.0,
+          "priceCurrency" : "GBP",
+          "url" : "https:\/\/www.reebok.eu\/en-gb\/products\/wardrobe-essentials-t-shirt-100253807-4519?variant=56698438386012",
+          "sizeSpecification": {
+            "@type": "SizeSpecification",
+            "size": "L",
+            "sizeSystem": "UK"
+          }
+          
+        },
+{
+          "@type" : "Offer",
+          "sku": "VR00250392","gtin13": 1200179488220,"availability" : "http://schema.org/InStock",
+          "itemCondition" : "http://schema.org/NewCondition",
+          "price" : 30.0,
+          "priceCurrency" : "GBP",
+          "url" : "https:\/\/www.reebok.eu\/en-gb\/products\/wardrobe-essentials-t-shirt-100253807-4519?variant=56698438418780",
+          "sizeSpecification": {
+            "@type": "SizeSpecification",
+            "size": "XL",
+            "sizeSystem": "UK"
+          }
+          
+        },
+{
+          "@type" : "Offer",
+          "sku": "VR00250393","gtin13": 1200179488237,"availability" : "http://schema.org/InStock",
+          "itemCondition" : "http://schema.org/NewCondition",
+          "price" : 30.0,
+          "priceCurrency" : "GBP",
+          "url" : "https:\/\/www.reebok.eu\/en-gb\/products\/wardrobe-essentials-t-shirt-100253807-4519?variant=56698438451548",
+          "sizeSpecification": {
+            "@type": "SizeSpecification",
+            "size": "2XL",
+            "sizeSystem": "UK"
+          }
+          
+        }
+]
+  }

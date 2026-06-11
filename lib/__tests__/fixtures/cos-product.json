@@ -1,0 +1,94 @@
+{
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "color": "GREEN",
+    "name": "BOUCLÉ-KNIT HENLEY T-SHIRT",
+    "image": [
+      "https://media.cos.com/assets/001/f4/ba/f4badf72786edcab1d17130692461979aac96ef7_xxl-1.jpg",
+      "https://media.cos.com/assets/001/ae/da/aeda239d6bc08e8e9a974947360ba34d21558334_xxl-1.jpg",
+      "https://media.cos.com/assets/001/b7/48/b7482f82d22464307044c5855e79af79e4dc6d23_xxl-1.jpg",
+      "https://media.cos.com/assets/001/d9/35/d93527fcb86cdd330cdeee3f3ee7a1f6f1f1888e_xxl-1.jpg",
+      "https://media.cos.com/assets/001/3e/8f/3e8f011ce6365c94926cfaa5558cfe3ef1529c8b_xxl-1.jpg",
+      "https://media.cos.com/assets/001/93/23/93233f8ca424a0bf10e9f4dc7d492c2433ca8afd_xxl-1.jpg",
+      "https://media.cos.com/assets/001/45/2e/452ec5dbecd2620937c16a46988c31e8bdbb0582_xxl-1.jpg",
+      "https://media.cos.com/assets/001/58/bc/58bcf5ed66fab5423861193b4181a60bf94bd308_xxl-1.jpg"
+    ],
+    "description": "Rich in texture, this Henley T-shirt is crafted from cotton-blend boucl&eacute; and comes in a versatile khaki tone. It pairs naturally with classic denim or can be styled with tailoring for a refined take.&nbsp;Relaxed fitButton closureMachine wash&nbsp;Back length of size M is 64cm / Model wears a size M&nbsp;",
+    "sku": "1328946001",
+    "brand": {
+      "@type": "Brand",
+      "name": "COS"
+    },
+    "category": {
+      "@type": "Thing",
+      "name": "men > menswear > tshirts > relaxed-fit"
+    },
+    "itemCondition": "https://schema.org/NewCondition",
+    "hasMerchantReturnPolicy": {
+      "@type": "MerchantReturnPolicy",
+      "applicableCountry": "GB",
+      "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow"
+    },
+    "offers": [
+      {
+        "@type": "Offer",
+        "price": 55,
+        "priceCurrency": "GBP",
+        "availability": "https://schema.org/InStock",
+        "sku": "1328946001001",
+        "url": "https://www.cos.com/en-gb/men/menswear/tshirts/relaxed-fit/product/boucl-knit-henley-t-shirt-khaki-1328946001",
+        "seller": {
+          "@type": "Organization",
+          "name": "COS"
+        }
+      },
+      {
+        "@type": "Offer",
+        "price": 55,
+        "priceCurrency": "GBP",
+        "availability": "https://schema.org/InStock",
+        "sku": "1328946001002",
+        "url": "https://www.cos.com/en-gb/men/menswear/tshirts/relaxed-fit/product/boucl-knit-henley-t-shirt-khaki-1328946001",
+        "seller": {
+          "@type": "Organization",
+          "name": "COS"
+        }
+      },
+      {
+        "@type": "Offer",
+        "price": 55,
+        "priceCurrency": "GBP",
+        "availability": "https://schema.org/InStock",
+        "sku": "1328946001003",
+        "url": "https://www.cos.com/en-gb/men/menswear/tshirts/relaxed-fit/product/boucl-knit-henley-t-shirt-khaki-1328946001",
+        "seller": {
+          "@type": "Organization",
+          "name": "COS"
+        }
+      },
+      {
+        "@type": "Offer",
+        "price": 55,
+        "priceCurrency": "GBP",
+        "availability": "https://schema.org/InStock",
+        "sku": "1328946001004",
+        "url": "https://www.cos.com/en-gb/men/menswear/tshirts/relaxed-fit/product/boucl-knit-henley-t-shirt-khaki-1328946001",
+        "seller": {
+          "@type": "Organization",
+          "name": "COS"
+        }
+      },
+      {
+        "@type": "Offer",
+        "price": 55,
+        "priceCurrency": "GBP",
+        "availability": "https://schema.org/InStock",
+        "sku": "1328946001005",
+        "url": "https://www.cos.com/en-gb/men/menswear/tshirts/relaxed-fit/product/boucl-knit-henley-t-shirt-khaki-1328946001",
+        "seller": {
+          "@type": "Organization",
+          "name": "COS"
+        }
+      }
+    ]
+  }

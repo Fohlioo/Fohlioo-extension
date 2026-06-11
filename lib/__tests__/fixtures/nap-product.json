@@ -1,0 +1,296 @@
+{
+  "@context": "https://schema.org",
+  "@type": "ProductGroup",
+  "name": "Ennio scalloped pointelle-knit tank",
+  "brand": { "@type": "Brand", "name": "KHAITE" },
+  "description": "Ennio scalloped pointelle-knit tank, available in cream or black. 41% Cotton 27% Silk 19% Cashmere 12% Polyamide 1% Polyurethane",
+  "variesBy": ["https://schema.org/size", "https://schema.org/color"],
+  "material": "41% Cotton 27% Silk 19% Cashmere 12% Polyamide 1% Polyurethane",
+  "audience": { "@type": "PeopleAudience", "suggestedGender": "female" },
+  "productGroupId": "1647597358463991P",
+  "hasVariant": [
+    {
+      "@context": "http://schema.org/",
+      "@type": "Product",
+      "sku": "0400661593185",
+      "image": [
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/in/w2000_q60.jpg"
+        },
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/ou/w2000_q60.jpg"
+        },
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/bk/w2000_q60.jpg"
+        },
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/cu/w2000_q60.jpg"
+        }
+      ],
+      "name": "Ennio scalloped pointelle-knit tank - cream - x small",
+      "description": "Ennio scalloped pointelle-knit tank in cream. Size: x small. Material: 41% Cotton 27% Silk 19% Cashmere 12% Polyamide 1% Polyurethane.",
+      "color": "cream",
+      "size": "x small",
+      "offers": {
+        "@type": "Offer",
+        "url": "https://www.net-a-porter.com/en-gb/shop/product/khaite/clothing/tanks-and-camis/ennio-scalloped-pointelle-knit-tank/1647597358465006",
+        "itemCondition": "https://schema.org/NewCondition",
+        "availability": "https://schema.org/OutOfStock",
+        "priceSpecification": [
+          {
+            "@type": "UnitPriceSpecification",
+            "price": "560.00",
+            "priceCurrency": "GBP",
+            "valueAddedTaxIncluded": "https://schema.org/True"
+          },
+          {
+            "@type": "UnitPriceSpecification",
+            "priceType": "https://schema.org/StrikethroughPrice",
+            "price": "1400.00",
+            "priceCurrency": "GBP",
+            "valueAddedTaxIncluded": "https://schema.org/True"
+          }
+        ],
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "GB",
+          "returnPolicyCategory": "http://schema.org/MerchantReturnFiniteReturnWindow",
+          "returnMethod": "https://schema.org/ReturnByMail"
+        }
+      },
+      "brand": { "@type": "Brand", "name": "KHAITE" },
+      "material": "41% Cotton 27% Silk 19% Cashmere 12% Polyamide 1% Polyurethane"
+    },
+    {
+      "@context": "http://schema.org/",
+      "@type": "Product",
+      "sku": "0400661594526",
+      "image": [
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/in/w2000_q60.jpg"
+        },
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/ou/w2000_q60.jpg"
+        },
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/bk/w2000_q60.jpg"
+        },
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/cu/w2000_q60.jpg"
+        }
+      ],
+      "name": "Ennio scalloped pointelle-knit tank - cream - small",
+      "description": "Ennio scalloped pointelle-knit tank in cream. Size: small. Material: 41% Cotton 27% Silk 19% Cashmere 12% Polyamide 1% Polyurethane.",
+      "color": "cream",
+      "size": "small",
+      "offers": {
+        "@type": "Offer",
+        "url": "https://www.net-a-porter.com/en-gb/shop/product/khaite/clothing/tanks-and-camis/ennio-scalloped-pointelle-knit-tank/1647597358465006",
+        "itemCondition": "https://schema.org/NewCondition",
+        "availability": "https://schema.org/InStock",
+        "priceSpecification": [
+          {
+            "@type": "UnitPriceSpecification",
+            "price": "560.00",
+            "priceCurrency": "GBP",
+            "valueAddedTaxIncluded": "https://schema.org/True"
+          },
+          {
+            "@type": "UnitPriceSpecification",
+            "priceType": "https://schema.org/StrikethroughPrice",
+            "price": "1400.00",
+            "priceCurrency": "GBP",
+            "valueAddedTaxIncluded": "https://schema.org/True"
+          }
+        ],
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "GB",
+          "returnPolicyCategory": "http://schema.org/MerchantReturnFiniteReturnWindow",
+          "returnMethod": "https://schema.org/ReturnByMail"
+        }
+      },
+      "brand": { "@type": "Brand", "name": "KHAITE" },
+      "material": "41% Cotton 27% Silk 19% Cashmere 12% Polyamide 1% Polyurethane"
+    },
+    {
+      "@context": "http://schema.org/",
+      "@type": "Product",
+      "sku": "0400661593147",
+      "image": [
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/in/w2000_q60.jpg"
+        },
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/ou/w2000_q60.jpg"
+        },
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/bk/w2000_q60.jpg"
+        },
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/cu/w2000_q60.jpg"
+        }
+      ],
+      "name": "Ennio scalloped pointelle-knit tank - cream - medium",
+      "description": "Ennio scalloped pointelle-knit tank in cream. Size: medium. Material: 41% Cotton 27% Silk 19% Cashmere 12% Polyamide 1% Polyurethane.",
+      "color": "cream",
+      "size": "medium",
+      "offers": {
+        "@type": "Offer",
+        "url": "https://www.net-a-porter.com/en-gb/shop/product/khaite/clothing/tanks-and-camis/ennio-scalloped-pointelle-knit-tank/1647597358465006",
+        "itemCondition": "https://schema.org/NewCondition",
+        "availability": "https://schema.org/InStock",
+        "priceSpecification": [
+          {
+            "@type": "UnitPriceSpecification",
+            "price": "560.00",
+            "priceCurrency": "GBP",
+            "valueAddedTaxIncluded": "https://schema.org/True"
+          },
+          {
+            "@type": "UnitPriceSpecification",
+            "priceType": "https://schema.org/StrikethroughPrice",
+            "price": "1400.00",
+            "priceCurrency": "GBP",
+            "valueAddedTaxIncluded": "https://schema.org/True"
+          }
+        ],
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "GB",
+          "returnPolicyCategory": "http://schema.org/MerchantReturnFiniteReturnWindow",
+          "returnMethod": "https://schema.org/ReturnByMail"
+        }
+      },
+      "brand": { "@type": "Brand", "name": "KHAITE" },
+      "material": "41% Cotton 27% Silk 19% Cashmere 12% Polyamide 1% Polyurethane"
+    },
+    {
+      "@context": "http://schema.org/",
+      "@type": "Product",
+      "sku": "0400661593680",
+      "image": [
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/in/w2000_q60.jpg"
+        },
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/ou/w2000_q60.jpg"
+        },
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/bk/w2000_q60.jpg"
+        },
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/cu/w2000_q60.jpg"
+        }
+      ],
+      "name": "Ennio scalloped pointelle-knit tank - cream - large",
+      "description": "Ennio scalloped pointelle-knit tank in cream. Size: large. Material: 41% Cotton 27% Silk 19% Cashmere 12% Polyamide 1% Polyurethane.",
+      "color": "cream",
+      "size": "large",
+      "offers": {
+        "@type": "Offer",
+        "url": "https://www.net-a-porter.com/en-gb/shop/product/khaite/clothing/tanks-and-camis/ennio-scalloped-pointelle-knit-tank/1647597358465006",
+        "itemCondition": "https://schema.org/NewCondition",
+        "availability": "https://schema.org/OutOfStock",
+        "priceSpecification": [
+          {
+            "@type": "UnitPriceSpecification",
+            "price": "560.00",
+            "priceCurrency": "GBP",
+            "valueAddedTaxIncluded": "https://schema.org/True"
+          },
+          {
+            "@type": "UnitPriceSpecification",
+            "priceType": "https://schema.org/StrikethroughPrice",
+            "price": "1400.00",
+            "priceCurrency": "GBP",
+            "valueAddedTaxIncluded": "https://schema.org/True"
+          }
+        ],
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "GB",
+          "returnPolicyCategory": "http://schema.org/MerchantReturnFiniteReturnWindow",
+          "returnMethod": "https://schema.org/ReturnByMail"
+        }
+      },
+      "brand": { "@type": "Brand", "name": "KHAITE" },
+      "material": "41% Cotton 27% Silk 19% Cashmere 12% Polyamide 1% Polyurethane"
+    },
+    {
+      "@context": "http://schema.org/",
+      "@type": "Product",
+      "sku": "0400661594519",
+      "image": [
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/in/w2000_q60.jpg"
+        },
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/ou/w2000_q60.jpg"
+        },
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/bk/w2000_q60.jpg"
+        },
+        {
+          "@type": "ImageObject",
+          "url": "https://www.net-a-porter.com/variants/images/1647597358465006/cu/w2000_q60.jpg"
+        }
+      ],
+      "name": "Ennio scalloped pointelle-knit tank - cream - x large",
+      "description": "Ennio scalloped pointelle-knit tank in cream. Size: x large. Material: 41% Cotton 27% Silk 19% Cashmere 12% Polyamide 1% Polyurethane.",
+      "color": "cream",
+      "size": "x large",
+      "offers": {
+        "@type": "Offer",
+        "url": "https://www.net-a-porter.com/en-gb/shop/product/khaite/clothing/tanks-and-camis/ennio-scalloped-pointelle-knit-tank/1647597358465006",
+        "itemCondition": "https://schema.org/NewCondition",
+        "availability": "https://schema.org/InStock",
+        "priceSpecification": [
+          {
+            "@type": "UnitPriceSpecification",
+            "price": "560.00",
+            "priceCurrency": "GBP",
+            "valueAddedTaxIncluded": "https://schema.org/True"
+          },
+          {
+            "@type": "UnitPriceSpecification",
+            "priceType": "https://schema.org/StrikethroughPrice",
+            "price": "1400.00",
+            "priceCurrency": "GBP",
+            "valueAddedTaxIncluded": "https://schema.org/True"
+          }
+        ],
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "GB",
+          "returnPolicyCategory": "http://schema.org/MerchantReturnFiniteReturnWindow",
+          "returnMethod": "https://schema.org/ReturnByMail"
+        }
+      },
+      "brand": { "@type": "Brand", "name": "KHAITE" },
+      "material": "41% Cotton 27% Silk 19% Cashmere 12% Polyamide 1% Polyurethane"
+    },
+    {
+      "url": "https://www.net-a-porter.com/en-gb/shop/product/khaite/clothing/tanks-and-camis/ennio-scalloped-pointelle-knit-tank/1647597358463992"
+    }
+  ]
+}
