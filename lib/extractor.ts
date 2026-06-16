@@ -1,6 +1,10 @@
 import type { ProductData } from '../interface'
 import { extractFromDom } from './dom-extractor'
 
+
+
+
+
 // ─── Price extraction ───────────────────────────────────────────────
 // Handles: offers.price, offers.priceSpecification (object or array — NAP),
 //          offers[0].price

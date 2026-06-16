@@ -20,6 +20,80 @@
   --shadow: 0 24px 48px rgba(17, 17, 17, 0.08);
 }
 
+
+/* Fonts */
+
+@font-face {
+  font-family: 'Fohlioo-sans';
+  src: url ('./assets/fonts/Hilmar-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fohlioo-sans-Bold';
+  src: url ('./assets/fonts/Hilmar-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fohlioo-sans-Medium';
+  src: url ('./assets/fonts/Hilmar-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fohlioo-sans-Light';
+  src: url ('./assets/fonts/Hilmar-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fohlioo-sans-ExtraLight';
+  src: url ('./assets/fonts/Hilmar-ExtraLight.otf') format('opentype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+@font-face {
+  font-family: 'Fohlioo-sans-SemiBold';
+  src: url ('./assets/fonts/Hilmar-SemiBold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fohlioo-sans-Thin';
+  src: url ('./assets/fonts/Hilmar-Thin.otf') format('opentype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+h1, 
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Fohlioo-sans-Bold';
+}
+
+p {
+  font-family: 'Fohlioo-sans';
+}
+
+
 * {
   box-sizing: border-box;
 }

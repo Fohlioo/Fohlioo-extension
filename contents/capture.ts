@@ -29,7 +29,10 @@ export const config: PlasmoCSConfig = {
     'https://*.arket.com/*',
     'https://*.hm.com/*',
     'https://*.reebok.eu/*',
-    'https://*.reebok.com/*'
+    'https://*.reebok.com/*',
+    'https://*.underarmour.com/*',
+    'https://*.puma.com/*',
+    'https://*.underarmour.co.uk/*',
   ]
 }
 
@@ -57,13 +60,13 @@ export function captureProduct (): ProductData | null {
     url: merged.url ?? window.location.href,
     capturedAt: new Date().toISOString()
   }
-
+/* 
   if (!productData.name && !productData.brand) {
     fohliooLog('capture', 'Skipped — not a product page', { url: window.location.href })
     return null
   }
 
-  fohliooLog('capture', 'Product captured', productData)
+  fohliooLog('capture', 'Product captured', productData) */
 
   return productData
 }
