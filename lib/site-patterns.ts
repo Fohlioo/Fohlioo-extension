@@ -7,7 +7,7 @@ export const SITE_PATTERNS: Record<string, string> = {
     "cos.com":          "Single Product — offers.price; sizes via DOM",
     "toteme-studio.com":"Single Product — offers.price",
     "arket.com":        "Single Product — offers.price",
-    "asos.com":         "Single Product — offers.price (SPA nav required)",
+    "asos.com":         "Single Product — sizes via select#variantSelector; wishlist data-testid=saveForLater",
     "stories.com":      "Single Product — offers.price",
     "hm.com":           "Partial — DOM fallback needed for price",
     "reebok.eu":        "Single Product — offers[] with sizeSpecification.size",

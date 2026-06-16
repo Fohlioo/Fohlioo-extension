@@ -57,7 +57,6 @@ describe('extractFromDom', () => {
           data-testid="size-selector-button-XS"
           value="23875-82686">
           <span class="relative z-10 block min-w-0 truncate">XS</span>
-          <span data-testid="stock-low-warning" class="absolute right-0.5 top-0.5">*</span>
         </button>
         <button
           type="button"
@@ -88,6 +87,27 @@ describe('extractFromDom', () => {
 
     const result = extractFromDom()
     expect(result.sizes).toEqual(['XS', 'S', 'M', 'L', 'XL'])
+  })
+
+  test('extracts ASOS variantSelector dropdown sizes', () => {
+    mockDom(
+      `
+      <div data-testid="variant-selector">
+        <div class="C09ug">
+          <select id="variantSelector">
+            <option value="">Please select</option>
+            <option value="200009832" data-testid="size-0" aria-label="W28 L32">W28 L32</option>
+            <option value="200009830" data-testid="size-1" aria-label="W29 L32">W29 L32</option>
+            <option value="200009826" data-testid="size-7" aria-label="W33 L32 - Out of stock">W33 L32 - Out of stock</option>
+          </select>
+        </div>
+      </div>
+    `,
+      'www.asos.com'
+    )
+
+    const result = extractFromDom()
+    expect(result.sizes).toEqual(['W28 L32', 'W29 L32', 'W33 L32'])
   })
 
   test('extracts product name and price from DOM', () => {

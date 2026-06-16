@@ -1,6 +1,7 @@
 import type { ProductData } from '../interface'
+import { LATEST_PRODUCT_KEY } from './session'
 
-const LATEST_PRODUCT_KEY = 'latestProduct'
+export { LATEST_PRODUCT_KEY }
 
 export async function getLatestProduct (): Promise<ProductData | null> {
   const result = await chrome.storage.local.get(LATEST_PRODUCT_KEY)

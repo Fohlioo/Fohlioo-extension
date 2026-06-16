@@ -70,7 +70,7 @@ Supported sites are listed in `contents/capture.ts` under `config.matches`. Curr
 fohlioo-extension/
 ├── assets/                  # Icons, logo (SVG/PNG)
 ├── components/
-│   └── product-preview.tsx  # Popup product card UI
+│   └── session-dashboard.tsx  # Popup session UI (product + live metrics)
 ├── contents/
 │   └── capture.ts           # Content script — runs on fashion PDPs
 ├── lib/
@@ -481,6 +481,7 @@ Contact: hello@fohlioo.co
 
 ## Further reading
 
+- **[Documentation folder](./documentation/README.md)** — plain-English guides: architecture, file reference, extraction, behaviour tracking, popup, glossary
 - [Plasmo documentation](https://docs.plasmo.com/)
 - [Chrome Extension MV3 overview](https://developer.chrome.com/docs/extensions/mv3/)
 - [schema.org Product](https://schema.org/Product)
