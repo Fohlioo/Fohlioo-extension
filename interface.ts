@@ -22,6 +22,10 @@ type SessionEventType =
   | 'wishlist_remove'
   | 'dwell_milestone'
   | 'scroll_milestone'
+  | 'details_section_view'
+  | 'material_section_view'
+  | 'size_guide_view'
+  | 'review_section_view'
 
 interface SessionEvent {
   type: SessionEventType

@@ -1,4 +1,8 @@
 import type { ProductData } from '../interface'
+import { getSiteAdapter } from './sites/adapters'
+import { getSiteKey } from './sites/registry'
+
+export { getSiteKey } from './sites/registry'
 
 type SiteSizeSelectors = {
   container: string
@@ -136,15 +140,13 @@ const COLOUR_SELECTORS = [
 
 const MATERIAL_LABELS = /material|composition|fabric/i
 
-function getSiteKey (hostname: string): string | null {
-  const host = hostname.replace(/^www\./, '')
-  for (const key of Object.keys(SITE_DOM_CONFIG)) {
-    if (host === key || host.endsWith(`.${key}`)) return key
-  }
-  return null
-}
+/** H&M group (COS, Arket, Stories, H&M) — composition in product details drawer */
+const HM_COMPOSITION_ROW_SELECTORS = [
+  '[data-testid="product-details-drawer-sustainability-materials"]',
+  '[data-testid="product-details-drawer-materials"] [data-testid*="sustainability-materials" i]',
+]
 
-export { getSiteKey }
+const HM_GROUP_SITES = new Set(['arket.com', 'stories.com', 'hm.com'])
 
 function textContent (el: Element | null): string | null {
   const text = el?.textContent?.trim()
@@ -503,14 +505,64 @@ function extractColourFromDom (): string | null {
   return null
 }
 
+function extractCompositionFromRow (row: Element): string | null {
+  const valueEl =
+    row.querySelector('.flex-1 span') ??
+    row.querySelector('span.body2_regular') ??
+    row.querySelector('span:last-of-type')
+
+  const value = textContent(valueEl)
+  if (value && !/^composition$/i.test(value)) return value
+
+  const full = row.textContent?.replace(/\s+/g, ' ').trim() ?? ''
+  const stripped = full.replace(/^composition\s*/i, '').trim()
+  return stripped.length > 0 ? stripped : null
+}
+
+/** COS / Arket / Stories / H&M — composition row in materials drawer tab */
+function extractHmGroupComposition (): string | null {
+  for (const selector of HM_COMPOSITION_ROW_SELECTORS) {
+    const row = document.querySelector(selector)
+    if (!row) continue
+    const value = extractCompositionFromRow(row)
+    if (value) return value
+  }
+  return null
+}
+
+function extractMaterialFromLabelRow (label: Element): string | null {
+  const sibling =
+    label.nextElementSibling ??
+    label.parentElement?.querySelector('dd, td, .flex-1')
+
+  const direct = textContent(sibling)
+  if (direct && !MATERIAL_LABELS.test(direct)) return direct
+
+  const nested = textContent(sibling?.querySelector('span, p'))
+  if (nested && !MATERIAL_LABELS.test(nested)) return nested
+
+  return null
+}
+
 function extractMaterialFromDom (): string | null {
+  const hostname = window.location.hostname
+  const adapter = getSiteAdapter(hostname)
+  if (adapter?.extractMaterial) {
+    return adapter.extractMaterial()
+  }
+
+  const siteKey = getSiteKey(hostname)
+  if (siteKey && HM_GROUP_SITES.has(siteKey)) {
+    const hmComposition = extractHmGroupComposition()
+    if (hmComposition) return hmComposition
+  }
+
   const labels = document.querySelectorAll('dl dt, tr th, li, span, p')
   for (const label of labels) {
-    if (!MATERIAL_LABELS.test(label.textContent ?? '')) continue
-    const sibling =
-      label.nextElementSibling ??
-      label.parentElement?.querySelector('dd, td')
-    const value = textContent(sibling)
+    const labelText = label.textContent?.trim() ?? ''
+    if (!MATERIAL_LABELS.test(labelText)) continue
+
+    const value = extractMaterialFromLabelRow(label)
     if (value) return value
   }
   return null

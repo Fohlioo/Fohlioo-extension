@@ -31,6 +31,13 @@ export type ScrollMilestoneMessage = {
   milestonePct: number
 }
 
+export type SectionEngagementMessage = {
+  type: 'SECTION_ENGAGEMENT'
+  data: ProductData
+  section: 'details' | 'materials' | 'size_guide' | 'reviews'
+  label: string
+}
+
 export type GetTabCountMessage = {
   type: 'GET_TAB_COUNT'
 }
@@ -56,6 +63,7 @@ export type ExtensionMessage =
   | WishlistRemoveMessage
   | DwellMilestoneMessage
   | ScrollMilestoneMessage
+  | SectionEngagementMessage
   | GetTabCountMessage
 
 export type GetProductResponse = {

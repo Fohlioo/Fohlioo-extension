@@ -1,0 +1,140 @@
+{
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "color": "BLACK",
+    "name": "PLEATED RELAXED-FIT WIDE-LEG TROUSERS",
+    "image": [
+      "https://media.cos.com/assets/001/e0/b8/e0b85cbfb75357608e4d5d1708ab79258255faed_xxl-1.jpg",
+      "https://media.cos.com/assets/001/b9/87/b9878cfb5dd1ef776a3a68d344589093cffc1a89_xxl-1.jpg",
+      "https://media.cos.com/assets/001/16/9d/169d171b4207b264b4c8bd03e3def34d384c7a6f_xxl-1.jpg",
+      "https://media.cos.com/assets/001/ca/9e/ca9e584b2cc424e452930bf8443a3d858e9c4939_xxl-1.jpg",
+      "https://media.cos.com/assets/001/e5/e1/e5e17a51d4a47f53bea239d42d1e673185bce77d_xxl-1.jpg",
+      "https://media.cos.com/assets/001/99/5a/995a9cd2ab0edd8d2fc80475658d1065364e68e8_xxl-1.jpg",
+      "https://media.cos.com/assets/001/48/cc/48cc63eb5f0c717386a4ee6c0239be3fe1ad7d1d_xxl-1.jpg",
+      "https://media.cos.com/assets/001/b8/de/b8de75ae5b6382ddd77868f8f74361ee47503277_xxl-1.jpg"
+    ],
+    "description": "This season, the COS menswear team modernise the classic codes of tailoring. Made from wool-twill, these trousers are cut in a relaxed, wide-leg shape and designed with front pleats and welt pockets.&nbsp;Relaxed fitHook-and-bar and zip closureDry clean&nbsp;Inside leg length of size EU 48 is 74.87cm / Model wears a size EU 48",
+    "sku": "1242415001",
+    "brand": {
+      "@type": "Brand",
+      "name": "COS"
+    },
+    "category": {
+      "@type": "Thing",
+      "name": "men > menswear > trousers > relaxed-fit > wideleg"
+    },
+    "itemCondition": "https://schema.org/NewCondition",
+    "hasMerchantReturnPolicy": {
+      "@type": "MerchantReturnPolicy",
+      "applicableCountry": "GB",
+      "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow"
+    },
+    "offers": [
+      {
+        "@type": "Offer",
+        "price": 139,
+        "priceCurrency": "GBP",
+        "availability": "https://schema.org/OutOfStock",
+        "sku": "1242415001002",
+        "url": "https://www.cos.com/en-gb/men/menswear/trousers/relaxed-fit/wideleg/product/wide-leg-pleated-wool-trousers-relaxed-black-1242415001",
+        "seller": {
+          "@type": "Organization",
+          "name": "COS"
+        }
+      },
+      {
+        "@type": "Offer",
+        "price": 139,
+        "priceCurrency": "GBP",
+        "availability": "https://schema.org/InStock",
+        "sku": "1242415001003",
+        "url": "https://www.cos.com/en-gb/men/menswear/trousers/relaxed-fit/wideleg/product/wide-leg-pleated-wool-trousers-relaxed-black-1242415001",
+        "seller": {
+          "@type": "Organization",
+          "name": "COS"
+        }
+      },
+      {
+        "@type": "Offer",
+        "price": 139,
+        "priceCurrency": "GBP",
+        "availability": "https://schema.org/InStock",
+        "sku": "1242415001004",
+        "url": "https://www.cos.com/en-gb/men/menswear/trousers/relaxed-fit/wideleg/product/wide-leg-pleated-wool-trousers-relaxed-black-1242415001",
+        "seller": {
+          "@type": "Organization",
+          "name": "COS"
+        }
+      },
+      {
+        "@type": "Offer",
+        "price": 139,
+        "priceCurrency": "GBP",
+        "availability": "https://schema.org/InStock",
+        "sku": "1242415001005",
+        "url": "https://www.cos.com/en-gb/men/menswear/trousers/relaxed-fit/wideleg/product/wide-leg-pleated-wool-trousers-relaxed-black-1242415001",
+        "seller": {
+          "@type": "Organization",
+          "name": "COS"
+        }
+      },
+      {
+        "@type": "Offer",
+        "price": 139,
+        "priceCurrency": "GBP",
+        "availability": "https://schema.org/InStock",
+        "sku": "1242415001006",
+        "url": "https://www.cos.com/en-gb/men/menswear/trousers/relaxed-fit/wideleg/product/wide-leg-pleated-wool-trousers-relaxed-black-1242415001",
+        "seller": {
+          "@type": "Organization",
+          "name": "COS"
+        }
+      },
+      {
+        "@type": "Offer",
+        "price": 139,
+        "priceCurrency": "GBP",
+        "availability": "https://schema.org/InStock",
+        "sku": "1242415001007",
+        "url": "https://www.cos.com/en-gb/men/menswear/trousers/relaxed-fit/wideleg/product/wide-leg-pleated-wool-trousers-relaxed-black-1242415001",
+        "seller": {
+          "@type": "Organization",
+          "name": "COS"
+        }
+      },
+      {
+        "@type": "Offer",
+        "price": 139,
+        "priceCurrency": "GBP",
+        "availability": "https://schema.org/InStock",
+        "sku": "1242415001008",
+        "url": "https://www.cos.com/en-gb/men/menswear/trousers/relaxed-fit/wideleg/product/wide-leg-pleated-wool-trousers-relaxed-black-1242415001",
+        "seller": {
+          "@type": "Organization",
+          "name": "COS"
+        }
+      }
+    ],
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "reviewCount": "1",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "review": [
+      {
+        "@type": "Review",
+        "author": {
+          "@type": "Person",
+          "name": "Ariel R"
+        },
+        "datePublished": "2024-10-03T12:16:18-04:00",
+        "reviewBody": "Amazing trouser, however IMO this season suiting pants are cut very small in the waist. Lovely fit though",
+        "reviewRating": {
+          "@type": "Rating",
+          "ratingValue": 5
+        }
+      }
+    ]
+  }

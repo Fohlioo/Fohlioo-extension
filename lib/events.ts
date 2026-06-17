@@ -7,13 +7,29 @@ import { fohliooLog } from './debug'
 import {
   findWishlistButton,
   inferAsosClickAction,
+  inferCosClickAction,
   inferWishlistAction,
   inferWishlistActionFromLabels,
   isAsosSite,
+  isCosSite,
   isWishlistActive,
   queryWishlistButtons,
   waitForWishlistButton,
 } from './wishlist'
+import {
+  applyCosWishlistToggle,
+  clearCosLogicalWishlistState,
+  getCosHeartPathSignature,
+  getCosLogicalWishlistState,
+  inferCosWishlistActionFromHeartChange,
+  inferCosWishlistActionFromHeartStates,
+  isCosHeartFilled,
+  isCosWishlistActive,
+  readCosWishlistLabel,
+  resolveCosWasFilled,
+  setCosLogicalWishlistState,
+} from './sites/cos/wishlist'
+import { getShopperSession } from './session'
 
 // ── Dwell time ─────────────────────────────────────────────────────
 // Uses Page Visibility API — accumulates across tab switches
@@ -139,6 +155,7 @@ export const startScrollTracking = (
 // Click-first + MutationObserver; ASOS uses click-intent (heart class, not aria-label)
 const WISHLIST_STATE_POLL_MS = 150
 const WISHLIST_ASOS_CONFIRM_MS = [150, 500, 1000]
+const WISHLIST_COS_CONFIRM_MS = [150, 400, 800]
 
 export function startWishlistTracking (
   product: ProductData,
@@ -152,9 +169,27 @@ export function startWishlistTracking (
   let clickCleanup: (() => void) | null = null
   let observer: MutationObserver | null = null
 
+  const productUrl = product.url
+
+  if (isCosSite(hostname)) {
+    void getShopperSession().then((session) => {
+      if (
+        session?.product.url === productUrl &&
+        session.wishlistStatus === 'saved'
+      ) {
+        setCosLogicalWishlistState(productUrl, true)
+      }
+    })
+  }
+
+  const readWishlistState = (btn: Element): boolean =>
+    isCosSite(hostname)
+      ? getCosLogicalWishlistState(productUrl) || isCosWishlistActive(btn)
+      : isWishlistActive(btn)
+
   const seedStates = () => {
     for (const btn of queryWishlistButtons(hostname)) {
-      lastStates.set(btn, isWishlistActive(btn))
+      lastStates.set(btn, readWishlistState(btn))
     }
   }
 
@@ -182,11 +217,72 @@ export function startWishlistTracking (
     cleanupReadyWait = null
 
     const clickCooldown = new WeakMap<Element, number>()
+    const cosPathBeforeClick = new Map<string, string>()
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!isCosSite(hostname)) return
+      const btn = findWishlistButton(event.target, hostname)
+      if (!btn) return
+      cosPathBeforeClick.set(productUrl, getCosHeartPathSignature(btn))
+    }
+
     seedStates()
 
     const onClick = (event: MouseEvent) => {
       const btn = findWishlistButton(event.target, hostname)
       if (!btn) return
+
+      if (isCosSite(hostname)) {
+        const pathBefore =
+          cosPathBeforeClick.get(productUrl) ??
+          getCosHeartPathSignature(btn)
+        cosPathBeforeClick.delete(productUrl)
+
+        const wasFilled = resolveCosWasFilled(productUrl, pathBefore, btn)
+
+        fohliooLog('wishlist', 'Button clicked', {
+          testId: btn.getAttribute('data-testid'),
+          wasActive: wasFilled,
+          labelBefore: readCosWishlistLabel(btn),
+          heartFilled: wasFilled,
+          logicalState: getCosLogicalWishlistState(productUrl),
+        })
+
+        clickCooldown.set(btn, Date.now())
+
+        let dispatched = false
+        const tryDispatchCosAction = (isLastAttempt: boolean) => {
+          if (dispatched) return
+
+          const pathAfter = getCosHeartPathSignature(btn)
+          const action =
+            inferCosWishlistActionFromHeartChange(
+              pathBefore,
+              pathAfter,
+              wasFilled
+            ) ??
+            inferCosWishlistActionFromHeartStates(
+              wasFilled,
+              isCosHeartFilled(btn)
+            ) ??
+            (isLastAttempt ? inferCosClickAction(wasFilled) : null)
+
+          if (!action) return
+
+          dispatched = true
+          applyCosWishlistToggle(productUrl, action, pathBefore, pathAfter)
+          dispatchAction(action)
+          lastStates.set(btn, action === 'wishlist_add')
+        }
+
+        WISHLIST_COS_CONFIRM_MS.forEach((delay, index) => {
+          window.setTimeout(() => {
+            tryDispatchCosAction(index === WISHLIST_COS_CONFIRM_MS.length - 1)
+          }, delay)
+        })
+
+        return
+      }
 
       const wasActive = lastStates.get(btn) ?? isWishlistActive(btn)
       fohliooLog('wishlist', 'Button clicked', {
@@ -220,9 +316,16 @@ export function startWishlistTracking (
     }
 
     observer = new MutationObserver(() => {
+      if (isCosSite(hostname)) {
+        for (const btn of queryWishlistButtons(hostname)) {
+          lastStates.set(btn, getCosLogicalWishlistState(productUrl))
+        }
+        return
+      }
+
       seedStates()
       for (const btn of queryWishlistButtons(hostname)) {
-        const isActive = isWishlistActive(btn)
+        const isActive = readWishlistState(btn)
         const wasActive = lastStates.get(btn)
         if (wasActive === undefined) {
           lastStates.set(btn, isActive)
@@ -244,15 +347,24 @@ export function startWishlistTracking (
       }
     })
 
+    document.addEventListener('pointerdown', onPointerDown, true)
     document.addEventListener('click', onClick, true)
     observer.observe(document.body, {
       subtree: true,
       attributes: true,
-      attributeFilter: ['aria-label', 'aria-pressed', 'aria-checked', 'class', 'data-auto-id'],
+      attributeFilter: [
+        'aria-label',
+        'aria-pressed',
+        'aria-checked',
+        'class',
+        'data-auto-id',
+        'title',
+      ],
       childList: true,
     })
 
     clickCleanup = () => {
+      document.removeEventListener('pointerdown', onPointerDown, true)
       document.removeEventListener('click', onClick, true)
       observer?.disconnect()
     }
@@ -276,5 +388,8 @@ export function startWishlistTracking (
   return () => {
     cleanupReadyWait?.()
     clickCleanup?.()
+    if (isCosSite(hostname)) {
+      clearCosLogicalWishlistState(productUrl)
+    }
   }
 }

@@ -1,0 +1,138 @@
+import type { ProductData } from '../../interface'
+import { mergeStickyProductFields } from '../product-merge'
+import {
+  getLiveMetrics,
+  resetLiveMetrics,
+  startDwellTracking,
+  startScrollTracking,
+  startWishlistTracking,
+} from '../events'
+import {
+  sendDwellMilestone,
+  sendProductCaptured,
+  sendScrollMilestone,
+  sendWishlistAdd,
+  sendWishlistRemove,
+} from './messenger'
+import { startProductHydrationWatch } from './hydration'
+import { captureProduct } from './product-capture'
+import { getSiteAdapter } from '../sites/adapters'
+
+type Cleanup = () => void
+
+/**
+ * Orchestrates one product-page session: capture, hydration watches,
+ * and behavioural trackers. Call `stop()` before starting a new page (SPA nav).
+ */
+export class ProductPageController {
+  private cleanups: Cleanup[] = []
+  private lastPublished = { sizes: '', material: '' }
+
+  stop (): void {
+    this.cleanups.forEach((c) => c())
+    this.cleanups = []
+    resetLiveMetrics()
+  }
+
+  start (): ProductData | null {
+    this.stop()
+
+    const product = captureProduct()
+    if (!product) return null
+
+    this.publishProduct(product)
+    this.lastPublished = {
+      sizes: product.sizes.join('|'),
+      material: product.material ?? '',
+    }
+
+    this.startHydration(product)
+    this.startBehaviourTrackers(product)
+    this.startEngagementTracking(product)
+
+    return product
+  }
+
+  private publishProduct (product: ProductData): void {
+    sendProductCaptured(product)
+  }
+
+  private onProductUpdated (product: ProductData): void {
+    const sizeKey = product.sizes.join('|')
+    const materialKey = product.material ?? ''
+    const sizesChanged =
+      product.sizes.length > 0 && sizeKey !== this.lastPublished.sizes
+    const materialChanged =
+      materialKey.length > 0 && materialKey !== this.lastPublished.material
+
+    if (!sizesChanged && !materialChanged) return
+
+    if (sizesChanged) this.lastPublished.sizes = sizeKey
+    if (materialChanged) this.lastPublished.material = materialKey
+
+    this.publishProduct(product)
+  }
+
+  private captureProductSticky (): ProductData | null {
+    const fresh = captureProduct()
+    if (!fresh) return null
+
+    const latched = {
+      ...fresh,
+      material: this.lastPublished.material || fresh.material,
+      sizes: this.lastPublished.sizes
+        ? this.lastPublished.sizes.split('|').filter(Boolean)
+        : fresh.sizes,
+    }
+
+    return mergeStickyProductFields(latched, fresh)
+  }
+
+  private startHydration (product: ProductData): void {
+    const hostname = window.location.hostname
+
+    this.cleanups.push(
+      startProductHydrationWatch({
+        hostname,
+        needsSizes: product.sizes.length === 0,
+        needsMaterial: !product.material,
+        ctx: {
+          captureProduct: () => this.captureProductSticky(),
+          onProductUpdated: (p) => this.onProductUpdated(p),
+          getLastMaterial: () => this.lastPublished.material,
+          setLastMaterial: (m) => {
+            this.lastPublished.material = m
+          },
+        },
+      })
+    )
+  }
+
+  private startBehaviourTrackers (product: ProductData): void {
+    this.cleanups.push(
+      startDwellTracking(product, (ms, p) => sendDwellMilestone(p, ms))
+    )
+    this.cleanups.push(
+      startScrollTracking(product, (pct, p) => sendScrollMilestone(p, pct))
+    )
+    this.cleanups.push(
+      startWishlistTracking(
+        product,
+        (p) => sendWishlistAdd(p),
+        (p) => sendWishlistRemove(p)
+      )
+    )
+  }
+
+  private startEngagementTracking (product: ProductData): void {
+    const adapter = getSiteAdapter(window.location.hostname)
+    if (adapter?.startEngagementTracking) {
+      this.cleanups.push(adapter.startEngagementTracking(product))
+    }
+  }
+
+  /** For popup GET_SESSION — merge stored session with live in-page metrics */
+  getLiveMetrics () {
+    return getLiveMetrics()
+  }
+}

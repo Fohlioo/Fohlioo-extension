@@ -16,14 +16,16 @@ Implementation lives in `lib/events.ts` (trackers) and `lib/wishlist.ts` (button
 
 **Milestones fired** (messages to background):
 
+
 | Seconds | Event label example |
-|---------|---------------------|
-| 15 | Viewed for 15s |
-| 30 | Viewed for 30s |
-| 60 | Viewed for 60s |
-| 90 | Viewed for 90s |
-| 120 | Viewed for 120s |
-| 180 | Viewed for 180s |
+| ------- | ------------------- |
+| 15      | Viewed for 15s      |
+| 30      | Viewed for 30s      |
+| 60      | Viewed for 60s      |
+| 90      | Viewed for 90s      |
+| 120     | Viewed for 120s     |
+| 180     | Viewed for 180s     |
+
 
 Each milestone sends `DWELL_MILESTONE` once per page view.
 
@@ -41,9 +43,11 @@ Formula roughly: `(scrollY + viewport height) / total document height × 100`.
 
 **Milestones:**
 
-| % | When it fires |
-|---|----------------|
+
+| %              | When it fires                      |
+| -------------- | ---------------------------------- |
 | 25, 50, 75, 90 | First time user reaches that depth |
+
 
 Sends `SCROLL_MILESTONE` to background.
 
@@ -59,36 +63,43 @@ Sends `SCROLL_MILESTONE` to background.
 
 **Hard part:** Every site uses different buttons, classes, and ARIA labels. Logic is split:
 
-1. **`lib/wishlist.ts`** — find buttons, detect active/inactive state
-2. **`lib/events.ts` → `startWishlistTracking`** — wire clicks + DOM mutations to callbacks
+1. `**lib/wishlist.ts`** — find buttons, detect active/inactive state
+2. `**lib/events.ts` → `startWishlistTracking**` — wire clicks + DOM mutations to callbacks
 
 ### Detection strategies
 
-| Strategy | When used |
-|----------|-----------|
-| **Click listener** | User clicks; infer add vs remove from state *before* click |
+
+| Strategy             | When used                                                                       |
+| -------------------- | ------------------------------------------------------------------------------- |
+| **Click listener**   | User clicks; infer add vs remove from state *before* click                      |
 | **MutationObserver** | Button `aria-label`, `class`, or `aria-pressed` changes without us seeing click |
-| **Deferred attach** | `waitForWishlistButton()` if React hasn’t rendered the button yet |
+| **Deferred attach**  | `waitForWishlistButton()` if React hasn’t rendered the button yet               |
+
 
 ### Site-specific notes
 
 **ASOS (`saveForLater`):**
+
 - Heart icon class toggles (`product-heartempty` vs `product-heartfilled`)
 - `aria-label` often stays “Save for later” even when saved → we use **click intent** (flip state on click) plus heart class confirmation
 
 **Arket / COS / H&M group (`pdp-addToWishlist`):**
+
 - `aria-label` usually changes between add/remove
 
 **Generic fallbacks:**
+
 - Buttons with aria-label containing “wishlist”, “favourite”, “save for later”
 - `data-testid`, `data-action="wishlist"`, etc.
 
 ### Messages
 
-| User action | Message type | Session update |
-|-------------|--------------|----------------|
-| Save | `WISHLIST_ADD` | `wishlistStatus: 'saved'` |
-| Unsave | `WISHLIST_REMOVE` | `wishlistStatus: 'not_saved'` |
+
+| User action | Message type      | Session update                |
+| ----------- | ----------------- | ----------------------------- |
+| Save        | `WISHLIST_ADD`    | `wishlistStatus: 'saved'`     |
+| Unsave      | `WISHLIST_REMOVE` | `wishlistStatus: 'not_saved'` |
+
 
 Activity feed gets “Added to wishlist” / “Removed from wishlist”.
 
@@ -119,12 +130,14 @@ All three receive the same `ProductData` so messages to background include produ
 
 On the **retailer page** console (not popup), filter `[Fohlioo:`:
 
-| Category | Colour / topic |
-|----------|----------------|
-| `dwell` | Green — milestones |
-| `scroll` | Cyan — scroll % |
-| `wishlist` | Pink — clicks, attach |
-| `message` | Gray — outbound to background |
+
+| Category   | Colour / topic                |
+| ---------- | ----------------------------- |
+| `dwell`    | Green — milestones            |
+| `scroll`   | Cyan — scroll %               |
+| `wishlist` | Pink — clicks, attach         |
+| `message`  | Gray — outbound to background |
+
 
 Controlled by `lib/debug.ts` (off in production builds).
 
@@ -138,9 +151,12 @@ Comments in `events.ts` mention cart detection, review section views, cart aband
 
 ## Changing behaviour
 
-| Change | File |
-|--------|------|
-| Dwell milestone times | `DWELL_MILESTONES_MS` in `events.ts` |
-| Scroll milestone % | `SCROLL_MILESTONES_PCT` in `events.ts` |
-| New site wishlist button | `WISHLIST_SITE_SELECTORS` in `wishlist.ts` |
-| Ring progress max (3 min dwell) | `dwellProgress()` in `session-format.ts` |
+
+| Change                          | File                                       |
+| ------------------------------- | ------------------------------------------ |
+| Dwell milestone times           | `DWELL_MILESTONES_MS` in `events.ts`       |
+| Scroll milestone %              | `SCROLL_MILESTONES_PCT` in `events.ts`     |
+| New site wishlist button        | `WISHLIST_SITE_SELECTORS` in `wishlist.ts` |
+| Ring progress max (3 min dwell) | `dwellProgress()` in `session-format.ts`   |
+
+

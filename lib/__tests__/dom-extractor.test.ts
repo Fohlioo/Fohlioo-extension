@@ -121,6 +121,85 @@ describe('extractFromDom', () => {
     expect(result.price).toBe(55)
     expect(result.currency).toBe('GBP')
   })
+
+  test('extracts COS composition when materials tab is active', () => {
+    mockDom(`
+      <div role="tablist">
+        <button role="tab" aria-selected="true" data-state="active">
+          Materials and Suppliers
+        </button>
+      </div>
+      <div role="tabpanel" data-testid="product-details-drawer-materials-supplier-tab">
+        <div data-testid="product-details-drawer-materials">
+          <div
+            data-testid="product-details-drawer-sustainability-materials"
+            class="flex items-baseline text-main-primary">
+            <span class="w-[9.625rem] shrink-0 body2_semibold">Composition</span>
+            <div class="flex-1">
+              <span class="body2_regular">Shell: 72% Linen, 28% Cotton</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `)
+
+    const result = extractFromDom()
+    expect(result.material).toBe('Shell: 72% Linen, 28% Cotton')
+  })
+
+  test('does not extract COS composition when row is hidden', () => {
+    mockDom(`
+      <button role="tab" aria-selected="true">Clothing</button>
+      <div role="tabpanel" hidden>
+        <div data-testid="product-details-drawer-sustainability-materials">
+          <span>Composition</span>
+          <div class="flex-1">
+            <span>Shell: 72% Linen, 28% Cotton</span>
+          </div>
+        </div>
+      </div>
+    `)
+
+    const result = extractFromDom()
+    expect(result.material).toBeNull()
+  })
+
+  test('extracts COS composition when row is visible despite nav tabs', () => {
+    mockDom(`
+      <button role="tab" aria-selected="true" data-state="active">Clothing</button>
+      <button role="tab" aria-selected="true" data-state="active">Materials and Suppliers</button>
+      <div role="tabpanel">
+        <div data-testid="product-details-drawer-sustainability-materials">
+          <span class="body2_semibold">Composition</span>
+          <div class="flex-1">
+            <span class="body2_regular">Shell: 72% Linen, 28% Cotton</span>
+          </div>
+        </div>
+      </div>
+    `)
+
+    const result = extractFromDom()
+    expect(result.material).toBe('Shell: 72% Linen, 28% Cotton')
+  })
+
+  test('fills missing COS material from DOM after JSON-LD', () => {
+    const jsonLd = {
+      name: cosFixture.name,
+      brand: 'COS',
+      price: 55,
+      currency: 'GBP',
+      material: null as string | null,
+      sizes: ['XS', 'S', 'M'],
+    }
+
+    const dom = {
+      material: 'Shell: 72% Linen, 28% Cotton',
+    }
+
+    const merged = mergeExtractedProductData(jsonLd, {}, dom)
+    expect(merged.material).toBe('Shell: 72% Linen, 28% Cotton')
+    expect(merged.extractionSource).toBe('json_ld')
+  })
 })
 
 describe('mergeExtractedProductData with DOM', () => {
