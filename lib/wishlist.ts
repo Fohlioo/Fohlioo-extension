@@ -1,4 +1,12 @@
-import { getSiteKey } from './dom-extractor'
+import {
+  COS_WISHLIST_SELECTOR,
+  isCosSite,
+  isCosWishlistActive,
+  isCosWishlistButton,
+} from './sites/cos/wishlist'
+import { getSiteKey } from './sites/registry'
+
+export { inferCosClickAction, isCosSite } from './sites/cos/wishlist'
 
 /** ASOS PDP — heart in [data-testid="primaryActions"], toggles saveForLater */
 const ASOS_WISHLIST_SELECTORS = [
@@ -12,7 +20,7 @@ const ASOS_WISHLIST_SELECTORS = [
 /** Site-first selectors, then generic fallbacks (comma-separated for querySelector) */
 const WISHLIST_SITE_SELECTORS: Record<string, string[]> = {
   'asos.com': ASOS_WISHLIST_SELECTORS,
-  'cos.com': ['button[data-testid="pdp-addToWishlist"]'],
+  'cos.com': [COS_WISHLIST_SELECTOR],
   'arket.com': ['button[data-testid="pdp-addToWishlist"]'],
   'stories.com': ['button[data-testid="pdp-addToWishlist"]'],
   'hm.com': ['button[data-testid="pdp-addToWishlist"]'],
@@ -91,6 +99,10 @@ export function inferAsosClickAction (wasActive: boolean): WishlistAction {
 export function isWishlistActive (el: Element): boolean {
   if (isAsosSaveForLaterButton(el)) {
     return isAsosWishlistActive(el)
+  }
+
+  if (isCosWishlistButton(el)) {
+    return isCosWishlistActive(el)
   }
 
   const ariaLabel = (el.getAttribute('aria-label') ?? '').toLowerCase().trim()
@@ -180,6 +192,11 @@ export function findWishlistButton (
     if (btn) return btn
   }
 
+  if (isCosSite(hostname)) {
+    const btn = target.closest(COS_WISHLIST_SELECTOR)
+    if (btn) return btn
+  }
+
   const selector = getWishlistButtonSelector(hostname)
   return target.closest(selector)
 }
@@ -196,6 +213,10 @@ export function queryWishlistButtons (hostname: string): Element[] {
     ]
     if (inPrimary.length > 0) return inPrimary
     return [...document.querySelectorAll('button[data-testid="saveForLater"]')]
+  }
+
+  if (isCosSite(hostname)) {
+    return [...document.querySelectorAll(COS_WISHLIST_SELECTOR)]
   }
 
   const selector = getWishlistButtonSelector(hostname)

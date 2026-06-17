@@ -21,6 +21,7 @@ Plain-English guides to how this codebase works. Start here if the repo feels co
 | 7 | [Messages & storage](./07-messages-and-storage.md) | How the content script, background, and popup talk |
 | 8 | [Testing & debugging](./08-testing-and-debugging.md) | Running tests, reading logs, common gotchas |
 | 9 | [Glossary](./09-glossary.md) | Jargon explained simply |
+| 10 | [Architecture](./10-architecture.md) | How to scale new sites and events — folder layout, class vs modules |
 
 ## One-sentence summary
 

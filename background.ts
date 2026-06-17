@@ -3,9 +3,11 @@ import type {
   ExtensionMessage,
   GetTabCountResponse,
   ScrollMilestoneMessage,
+  SectionEngagementMessage,
   WishlistAddMessage,
   WishlistRemoveMessage,
 } from './types/messages'
+import type { SessionEventType } from './interface'
 import {
   applySessionUpdate,
   buildInitialSession,
@@ -13,31 +15,41 @@ import {
   getShopperSession,
   setShopperSession,
 } from './lib/session'
+import { isFashionSite } from './lib/sites/registry'
+import { mergeStickyProductFields } from './lib/product-merge'
 
-const FASHION_DOMAINS = [
-  'cos.com',
-  'net-a-porter.com',
-  'mrporter.com',
-  'asos.com',
-  'zara.com',
-  'toteme-studio.com',
-  'reiss.com',
-  'stories.com',
-  'arket.com',
-  'hm.com',
-  'reebok.eu',
-  'reebok.com',
-]
-
-function isFashionSite (url: string): boolean {
-  return FASHION_DOMAINS.some((domain) => url.includes(domain))
+const SECTION_EVENT_TYPE: Record<
+  SectionEngagementMessage['section'],
+  SessionEventType
+> = {
+  details: 'details_section_view',
+  materials: 'material_section_view',
+  size_guide: 'size_guide_view',
+  reviews: 'review_section_view',
 }
 
 chrome.runtime.onMessage.addListener(
   (message: ExtensionMessage, _sender, sendResponse) => {
     if (message.type === 'PRODUCT_CAPTURED') {
-      const session = buildInitialSession(message.data)
-      setShopperSession(session)
+      getShopperSession()
+        .then((existing) => {
+          const sameProduct =
+            existing?.product.url === message.data.url &&
+            existing?.product.name === message.data.name
+
+          if (sameProduct && existing) {
+            return setShopperSession({
+              ...existing,
+              product: mergeStickyProductFields(
+                existing.product,
+                message.data
+              ),
+              updatedAt: new Date().toISOString(),
+            })
+          }
+
+          return setShopperSession(buildInitialSession(message.data))
+        })
         .then(() => sendResponse({ success: true }))
         .catch((err: Error) =>
           sendResponse({ success: false, error: err.message })
@@ -99,6 +111,15 @@ chrome.runtime.onMessage.addListener(
           { scrollDepthPct }
         )
       })
+      return false
+    }
+
+    if (message.type === 'SECTION_ENGAGEMENT') {
+      const msg = message as SectionEngagementMessage
+      applySessionUpdate(
+        msg.data,
+        createSessionEvent(SECTION_EVENT_TYPE[msg.section], msg.label)
+      ).catch(() => {})
       return false
     }
 

@@ -4,6 +4,7 @@ import type {
   SessionEventType,
   ShopperSession,
 } from '../interface'
+import { mergeStickyProductFields } from './product-merge'
 
 export const SESSION_KEY = 'shopperSession'
 export const LATEST_PRODUCT_KEY = 'latestProduct'
@@ -72,12 +73,17 @@ export async function applySessionUpdate (
     existing?.product.url === product.url &&
     existing?.product.name === product.name
 
+  const mergedProduct =
+    sameProduct && existing
+      ? mergeStickyProductFields(existing.product, product)
+      : product
+
   const base = sameProduct && existing
     ? existing
-    : buildInitialSession(product)
+    : buildInitialSession(mergedProduct)
 
   const next = mergeSessionEvent(
-    { ...base, product },
+    { ...base, product: mergedProduct },
     event,
     patch
   )
