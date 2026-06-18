@@ -8,7 +8,7 @@ Think of it as a **quiet observer** on supported fashion websites. It does not c
 
 1. Notices when you're on a **product page** (a single item — e.g. a coat on COS, not the homepage)
 2. **Reads** product info from the page (name, brand, price, sizes, images)
-3. **Watches** what you do on that page (how long you stay, how far you scroll, whether you save to wishlist)
+3. **Watches** what you do on that page (how long you stay, how far you scroll, wishlist, section clicks)
 4. **Remembers** the latest session and shows it in the **popup** when you click the Fohlioo icon
 
 That data will eventually feed the full Fohlioo platform (style profile for shoppers, analytics for brands). Right now, Phase 1 focuses on **capturing it reliably**.
@@ -45,8 +45,9 @@ If you're on Gmail or a non-fashion site, the extension does nothing — by desi
 
 - **Dwell time** — how long the tab was visible (pauses when you switch tabs)
 - **Scroll depth** — furthest % down the page you scrolled
-- **Wishlist** — saved vs not saved (when we can detect the heart/save button)
-- **Activity feed** — a short log of milestones (e.g. “Viewed for 30s”, “Added to wishlist”)
+- **Wishlist** — saved vs not saved (site-specific adapters on ASOS, COS, Zara)
+- **Section engagement** — intentional clicks on PDP sections (size guide, materials, details, reviews) — retailer-specific
+- **Activity feed** — a short log of milestones (e.g. “Viewed for 30s”, “Opened size & fit”)
 
 ## What we deliberately do *not* do (Phase 1)
 

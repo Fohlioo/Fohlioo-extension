@@ -50,8 +50,11 @@ Every meaningful file in `fohlioo-extension/`, what it does, and who uses it.
 
 | File | Role |
 |------|------|
-| `lib/events.ts` | **Dwell, scroll, wishlist orchestration.** Exports trackers used by `capture.ts`. Keeps `liveDwellMs` / `liveScrollDepthPct` for realtime popup. |
-| `lib/wishlist.ts` | **Site-specific wishlist button detection** (ASOS `saveForLater`, H&M group `pdp-addToWishlist`). Click vs MutationObserver logic, ASOS heart-class detection. |
+| `lib/events.ts` | **Dwell, scroll, wishlist orchestration.** Used by `ProductPageController`. |
+| `lib/wishlist.ts` | **Wishlist routing** — delegates to `lib/sites/cos/wishlist.ts`, `lib/sites/zara/wishlist.ts`, ASOS helpers. |
+| `lib/sites/` | **Per-retailer adapters** — engagement, wishlist, material passive watch. |
+| `lib/sites/adapters/` | Registry: COS, Net-a-Porter, ASOS, Zara. |
+| `lib/product-merge.ts` | Sticky material/sizes — fields don’t regress when DOM hides them. |
 
 ---
 
@@ -79,9 +82,13 @@ Every meaningful file in `fohlioo-extension/`, what it does, and who uses it.
 | File / folder | Role |
 |---------------|------|
 | `vitest.config.ts` | Vitest config — uses **jsdom** to simulate a browser DOM in tests. |
-| `lib/__tests__/extractor.test.ts` | JSON-LD parsing tests (Net-a-Porter, Zara fixtures). |
-| `lib/__tests__/dom-extractor.test.ts` | DOM size extraction (COS buttons, ASOS select, merge behaviour). |
-| `lib/__tests__/wishlist.test.ts` | Wishlist button selectors and ASOS/Arket active-state logic. |
+| `lib/__tests__/extractor.test.ts` | JSON-LD parsing (Net-a-Porter, Zara fixtures). |
+| `lib/__tests__/dom-extractor.test.ts` | DOM size extraction (COS buttons, ASOS select). |
+| `lib/__tests__/wishlist.test.ts` | Wishlist selectors — ASOS, COS, Zara logical state. |
+| `lib/__tests__/asos-engagement.test.ts` | ASOS accordion click classification. |
+| `lib/__tests__/nap-engagement.test.ts` | Net-a-Porter accordion clicks. |
+| `lib/__tests__/zara-engagement.test.ts` | Zara PDP action buttons. |
+| `lib/__tests__/product-merge.test.ts` | Sticky material/sizes merge. |
 | `lib/__tests__/fixtures/` | Real saved HTML/JSON-LD snippets from retailers for realistic tests. |
 
 ---
@@ -128,7 +135,9 @@ popup.tsx
 | Add a new fashion site URL | `contents/capture.ts` (`config.matches`) + often `background.ts` (`FASHION_DOMAINS`) |
 | Fix wrong price/name from JSON-LD | `lib/extractor.ts` |
 | Fix missing sizes on a site | `lib/dom-extractor.ts` (`SITE_DOM_CONFIG`) |
-| Fix wishlist not firing | `lib/wishlist.ts`, then `lib/events.ts` |
+| Fix wishlist not firing | `lib/sites/<brand>/wishlist.ts`, `lib/wishlist.ts`, `lib/events.ts` |
+| Fix section engagement | `lib/sites/<brand>/engagement.ts`, adapter registry |
+| Add engagement for new site | See [Architecture](./10-architecture.md) + [Behaviour tracking](./05-behaviour-tracking.md) |
 | Change dwell/scroll milestones | `lib/events.ts` (`DWELL_MILESTONES_MS`, `SCROLL_MILESTONES_PCT`) |
 | Change popup layout or copy | `components/session-dashboard.tsx`, `popup.css` |
 | Change what gets stored in session | `lib/session.ts`, `background.ts` |

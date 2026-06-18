@@ -28,19 +28,58 @@ export const config: PlasmoCSConfig = {
 
 const controller = new ProductPageController()
 
-installCaptureMessageHandler(controller)
-controller.start()
+const CAPTURE_RETRY_MS = 500
+const CAPTURE_RETRY_MAX = 40
 
-let lastUrl = window.location.href
-const navObserver = new MutationObserver(() => {
-  if (window.location.href === lastUrl) return
+/** ASOS and other React PDPs often hydrate after document_idle */
+function startCaptureWithRetry (): void {
+  try {
+    if (controller.start()) return
+  } catch (err) {
+    fohliooLog('capture', 'controller.start threw on first pass', err)
+  }
 
-  lastUrl = window.location.href
-  fohliooLog('spa', 'Navigation detected — recapturing in 800ms', { url: lastUrl })
-  window.setTimeout(() => controller.start(), 800)
-})
+  fohliooLog('capture', 'Product not ready on first pass — scheduling retries')
+  let attempts = 0
+  const timer = window.setInterval(() => {
+    attempts++
+    try {
+      if (controller.start()) {
+        window.clearInterval(timer)
+        return
+      }
+    } catch (err) {
+      fohliooLog('capture', 'controller.start threw during retry', err)
+    }
+    if (attempts >= CAPTURE_RETRY_MAX) {
+      window.clearInterval(timer)
+      fohliooLog('capture', 'Product capture stopped retrying')
+    }
+  }, CAPTURE_RETRY_MS)
+}
 
-navObserver.observe(document.body, {
-  subtree: true,
-  childList: true,
-})
+try {
+  fohliooLog('capture', 'Fohlioo content script loaded', {
+    url: window.location.href,
+  })
+  installCaptureMessageHandler(controller)
+  startCaptureWithRetry()
+
+  let lastUrl = window.location.href
+  const navObserver = new MutationObserver(() => {
+    if (window.location.href === lastUrl) return
+
+    lastUrl = window.location.href
+    fohliooLog('spa', 'Navigation detected — recapturing in 800ms', {
+      url: lastUrl,
+    })
+    window.setTimeout(() => startCaptureWithRetry(), 800)
+  })
+
+  navObserver.observe(document.body, {
+    subtree: true,
+    childList: true,
+  })
+} catch (err) {
+  fohliooLog('capture', 'Fatal error initialising content script', err)
+}

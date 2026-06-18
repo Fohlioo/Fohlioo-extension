@@ -4,9 +4,19 @@ import {
   isCosWishlistActive,
   isCosWishlistButton,
 } from './sites/cos/wishlist'
+import {
+  ZARA_WISHLIST_SELECTOR,
+  isZaraSite,
+  isZaraWishlistActive,
+  isZaraWishlistButton,
+} from './sites/zara/wishlist'
 import { getSiteKey } from './sites/registry'
 
 export { inferCosClickAction, isCosSite } from './sites/cos/wishlist'
+export {
+  inferZaraClickAction,
+  isZaraSite,
+} from './sites/zara/wishlist'
 
 /** ASOS PDP — heart in [data-testid="primaryActions"], toggles saveForLater */
 const ASOS_WISHLIST_SELECTORS = [
@@ -21,6 +31,7 @@ const ASOS_WISHLIST_SELECTORS = [
 const WISHLIST_SITE_SELECTORS: Record<string, string[]> = {
   'asos.com': ASOS_WISHLIST_SELECTORS,
   'cos.com': [COS_WISHLIST_SELECTOR],
+  'zara.com': [ZARA_WISHLIST_SELECTOR],
   'arket.com': ['button[data-testid="pdp-addToWishlist"]'],
   'stories.com': ['button[data-testid="pdp-addToWishlist"]'],
   'hm.com': ['button[data-testid="pdp-addToWishlist"]'],
@@ -103,6 +114,10 @@ export function isWishlistActive (el: Element): boolean {
 
   if (isCosWishlistButton(el)) {
     return isCosWishlistActive(el)
+  }
+
+  if (isZaraWishlistButton(el)) {
+    return isZaraWishlistActive(el)
   }
 
   const ariaLabel = (el.getAttribute('aria-label') ?? '').toLowerCase().trim()
@@ -197,6 +212,11 @@ export function findWishlistButton (
     if (btn) return btn
   }
 
+  if (isZaraSite(hostname)) {
+    const btn = target.closest(ZARA_WISHLIST_SELECTOR)
+    if (btn) return btn
+  }
+
   const selector = getWishlistButtonSelector(hostname)
   return target.closest(selector)
 }
@@ -217,6 +237,10 @@ export function queryWishlistButtons (hostname: string): Element[] {
 
   if (isCosSite(hostname)) {
     return [...document.querySelectorAll(COS_WISHLIST_SELECTOR)]
+  }
+
+  if (isZaraSite(hostname)) {
+    return [...document.querySelectorAll(ZARA_WISHLIST_SELECTOR)]
   }
 
   const selector = getWishlistButtonSelector(hostname)

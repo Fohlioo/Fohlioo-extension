@@ -98,7 +98,9 @@ function sectionEventLabel (section: EngagementSection): string {
  * Observes intentional shopper clicks on NAP PDP accordions — read-only.
  * Never simulates or triggers UI actions.
  */
-export function startNapEngagementTracking (product: ProductData): () => void {
+export function startNapEngagementTracking (
+  getProduct: () => ProductData
+): () => void {
   const fired = new Set<EngagementSection>()
 
   const onClick = (event: MouseEvent) => {
@@ -109,6 +111,7 @@ export function startNapEngagementTracking (product: ProductData): () => void {
     if (!section || fired.has(section)) return
 
     fired.add(section)
+    const product = getProduct()
     fohliooLog('capture', `NAP shopper engagement: ${section}`, {
       product: product.name,
     })

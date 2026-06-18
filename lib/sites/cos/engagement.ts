@@ -47,7 +47,9 @@ const SECTION_LABELS: Record<CosEngagementSection, string> = {
  * Observes intentional shopper clicks on PDP sections — read-only, for segmentation.
  * Never simulates or triggers UI actions.
  */
-export function startCosEngagementTracking (product: ProductData): () => void {
+export function startCosEngagementTracking (
+  getProduct: () => ProductData
+): () => void {
   const fired = new Set<CosEngagementSection>()
 
   const onClick = (event: MouseEvent) => {
@@ -58,6 +60,7 @@ export function startCosEngagementTracking (product: ProductData): () => void {
     if (!section || fired.has(section)) return
 
     fired.add(section)
+    const product = getProduct()
     fohliooLog('capture', `COS shopper engagement: ${section}`, {
       product: product.name,
     })

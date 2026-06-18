@@ -29,8 +29,9 @@ All message **shapes** are defined in `types/messages.ts`.
 | `WISHLIST_REMOVE` | `{ data: ProductData }` | Update wishlist + activity event |
 | `DWELL_MILESTONE` | `{ data, milestoneMs }` | Update `dwellMs` + activity event |
 | `SCROLL_MILESTONE` | `{ data, milestonePct }` | Update `scrollDepthPct` + activity event |
+| `SECTION_ENGAGEMENT` | `{ data, section, label }` | Append activity event (`details_section_view`, `material_section_view`, `size_guide_view`, `review_section_view`) |
 
-Sent from `capture.ts` via `chrome.runtime.sendMessage`.
+Sent from content script via `lib/capture/messenger.ts` → `chrome.runtime.sendMessage`.
 
 Failures are silently caught (extension reload during dev).
 

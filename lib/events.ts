@@ -1,6 +1,6 @@
 // lib/events.ts
-// Dwell time, scroll depth, wishlist, cart detection
-// These are the behavioural signals — not yet captured at all
+// Behavioural signals: dwell time, scroll depth, wishlist add/remove.
+// Wired via ProductPageController → lib/capture/messenger.ts → background session.
 
 import type { ProductData } from '../interface'
 import { fohliooLog } from './debug'
@@ -13,6 +13,7 @@ import {
   isAsosSite,
   isCosSite,
   isWishlistActive,
+  isZaraSite,
   queryWishlistButtons,
   waitForWishlistButton,
 } from './wishlist'
@@ -29,6 +30,19 @@ import {
   resolveCosWasFilled,
   setCosLogicalWishlistState,
 } from './sites/cos/wishlist'
+import {
+  applyZaraWishlistToggle,
+  clearZaraLogicalWishlistState,
+  getZaraBookmarkSignature,
+  getZaraLogicalWishlistState,
+  inferZaraClickAction,
+  inferZaraWishlistActionFromBookmarkChange,
+  inferZaraWishlistActionFromBookmarkStates,
+  isZaraBookmarkFilled,
+  readZaraWishlistAriaLabel,
+  resolveZaraWasSaved,
+  setZaraLogicalWishlistState,
+} from './sites/zara/wishlist'
 import { getShopperSession } from './session'
 
 // ── Dwell time ─────────────────────────────────────────────────────
@@ -156,6 +170,7 @@ export const startScrollTracking = (
 const WISHLIST_STATE_POLL_MS = 150
 const WISHLIST_ASOS_CONFIRM_MS = [150, 500, 1000]
 const WISHLIST_COS_CONFIRM_MS = [150, 400, 800]
+const WISHLIST_ZARA_CONFIRM_MS = [150, 400, 800]
 
 export function startWishlistTracking (
   product: ProductData,
@@ -182,10 +197,26 @@ export function startWishlistTracking (
     })
   }
 
-  const readWishlistState = (btn: Element): boolean =>
-    isCosSite(hostname)
-      ? getCosLogicalWishlistState(productUrl) || isCosWishlistActive(btn)
-      : isWishlistActive(btn)
+  if (isZaraSite(hostname)) {
+    void getShopperSession().then((session) => {
+      if (
+        session?.product.url === productUrl &&
+        session.wishlistStatus === 'saved'
+      ) {
+        setZaraLogicalWishlistState(productUrl, true)
+      }
+    })
+  }
+
+  const readWishlistState = (btn: Element): boolean => {
+    if (isCosSite(hostname)) {
+      return getCosLogicalWishlistState(productUrl) || isCosWishlistActive(btn)
+    }
+    if (isZaraSite(hostname)) {
+      return getZaraLogicalWishlistState(productUrl) || isZaraBookmarkFilled(btn)
+    }
+    return isWishlistActive(btn)
+  }
 
   const seedStates = () => {
     for (const btn of queryWishlistButtons(hostname)) {
@@ -218,12 +249,20 @@ export function startWishlistTracking (
 
     const clickCooldown = new WeakMap<Element, number>()
     const cosPathBeforeClick = new Map<string, string>()
+    const zaraSignatureBeforeClick = new Map<string, string>()
 
     const onPointerDown = (event: PointerEvent) => {
-      if (!isCosSite(hostname)) return
       const btn = findWishlistButton(event.target, hostname)
       if (!btn) return
-      cosPathBeforeClick.set(productUrl, getCosHeartPathSignature(btn))
+
+      if (isCosSite(hostname)) {
+        cosPathBeforeClick.set(productUrl, getCosHeartPathSignature(btn))
+        return
+      }
+
+      if (isZaraSite(hostname)) {
+        zaraSignatureBeforeClick.set(productUrl, getZaraBookmarkSignature(btn))
+      }
     }
 
     seedStates()
@@ -284,6 +323,62 @@ export function startWishlistTracking (
         return
       }
 
+      if (isZaraSite(hostname)) {
+        const signatureBefore =
+          zaraSignatureBeforeClick.get(productUrl) ??
+          getZaraBookmarkSignature(btn)
+        zaraSignatureBeforeClick.delete(productUrl)
+
+        const wasSaved = resolveZaraWasSaved(productUrl, signatureBefore, btn)
+
+        fohliooLog('wishlist', 'Button clicked', {
+          qaAction: btn.getAttribute('data-qa-action'),
+          wasActive: wasSaved,
+          labelBefore: readZaraWishlistAriaLabel(btn),
+          logicalState: getZaraLogicalWishlistState(productUrl),
+        })
+
+        clickCooldown.set(btn, Date.now())
+
+        let dispatched = false
+        const tryDispatchZaraAction = (isLastAttempt: boolean) => {
+          if (dispatched) return
+
+          const signatureAfter = getZaraBookmarkSignature(btn)
+          const action =
+            inferZaraWishlistActionFromBookmarkChange(
+              signatureBefore,
+              signatureAfter,
+              wasSaved
+            ) ??
+            inferZaraWishlistActionFromBookmarkStates(
+              wasSaved,
+              isZaraBookmarkFilled(btn)
+            ) ??
+            (isLastAttempt ? inferZaraClickAction(wasSaved) : null)
+
+          if (!action) return
+
+          dispatched = true
+          applyZaraWishlistToggle(
+            productUrl,
+            action,
+            signatureBefore,
+            signatureAfter
+          )
+          dispatchAction(action)
+          lastStates.set(btn, action === 'wishlist_add')
+        }
+
+        WISHLIST_ZARA_CONFIRM_MS.forEach((delay, index) => {
+          window.setTimeout(() => {
+            tryDispatchZaraAction(index === WISHLIST_ZARA_CONFIRM_MS.length - 1)
+          }, delay)
+        })
+
+        return
+      }
+
       const wasActive = lastStates.get(btn) ?? isWishlistActive(btn)
       fohliooLog('wishlist', 'Button clicked', {
         testId: btn.getAttribute('data-testid'),
@@ -323,6 +418,13 @@ export function startWishlistTracking (
         return
       }
 
+      if (isZaraSite(hostname)) {
+        for (const btn of queryWishlistButtons(hostname)) {
+          lastStates.set(btn, getZaraLogicalWishlistState(productUrl))
+        }
+        return
+      }
+
       seedStates()
       for (const btn of queryWishlistButtons(hostname)) {
         const isActive = readWishlistState(btn)
@@ -358,6 +460,7 @@ export function startWishlistTracking (
         'aria-checked',
         'class',
         'data-auto-id',
+        'data-qa-action',
         'title',
       ],
       childList: true,
@@ -390,6 +493,9 @@ export function startWishlistTracking (
     clickCleanup?.()
     if (isCosSite(hostname)) {
       clearCosLogicalWishlistState(productUrl)
+    }
+    if (isZaraSite(hostname)) {
+      clearZaraLogicalWishlistState(productUrl)
     }
   }
 }

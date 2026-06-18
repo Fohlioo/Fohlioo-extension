@@ -22,10 +22,13 @@ Plain-English guides to how this codebase works. Start here if the repo feels co
 | 8 | [Testing & debugging](./08-testing-and-debugging.md) | Running tests, reading logs, common gotchas |
 | 9 | [Glossary](./09-glossary.md) | Jargon explained simply |
 | 10 | [Architecture](./10-architecture.md) | How to scale new sites and events — folder layout, class vs modules |
+| 11 | [Progress & roadmap](./11-progress-and-roadmap.md) | Status vs Notion spec, site coverage, next steps |
 
 ## One-sentence summary
 
-**The extension quietly watches you browse fashion product pages, extracts product details from the page, tracks how you engage (time, scroll, wishlist), stores that in Chrome storage, and shows it live in the popup.**
+**The extension quietly watches you browse fashion product pages, extracts product details from the page, tracks how you engage (time, scroll, wishlist, section clicks), stores that in Chrome storage, and shows it live in the popup.**
+
+For alignment with the [Extension Data Capture & Segmentation Engine](https://app.notion.com/p/Extension-Data-Capture-Segmentation-Engine-36ef963f48fc810bb07dea6c4475dffe) Notion spec, see [Progress & roadmap](./11-progress-and-roadmap.md).
 
 ## Quick map
 

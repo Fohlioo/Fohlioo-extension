@@ -6,6 +6,7 @@ import {
   inferAsosClickAction,
   inferWishlistAction,
   inferWishlistActionFromLabels,
+  inferZaraClickAction,
   isWishlistActive,
   queryWishlistButtons,
 } from '../wishlist'
@@ -20,6 +21,12 @@ import {
   resolveCosWasFilled,
   setCosLogicalWishlistState,
 } from '../sites/cos/wishlist'
+import {
+  applyZaraWishlistToggle,
+  clearZaraLogicalWishlistState,
+  getZaraLogicalWishlistState,
+  resolveZaraWasSaved,
+} from '../sites/zara/wishlist'
 
 describe('ASOS wishlist detection', () => {
   test('selector prioritises saveForLater in primaryActions', () => {
@@ -244,6 +251,87 @@ describe('COS wishlist detection', () => {
     const buttons = queryWishlistButtons('www.cos.com')
     expect(buttons).toHaveLength(1)
     expect(buttons[0]?.getAttribute('data-testid')).toBe('wishlist-button')
+    document.body.innerHTML = ''
+  })
+})
+
+describe('Zara wishlist detection', () => {
+  test('selector uses data-qa-action add-to-wishlist', () => {
+    const selector = getWishlistButtonSelector('www.zara.com')
+    expect(selector).toContain('data-qa-action="add-to-wishlist"')
+    expect(selector).toContain('add-item-to-wishlist-button')
+  })
+
+  test('add state — Add item to the wish list', () => {
+    const btn = document.createElement('button')
+    btn.setAttribute('data-qa-action', 'add-to-wishlist')
+    btn.setAttribute('aria-label', 'Add item to the wish list')
+    btn.innerHTML =
+      '<svg class="wishlist-icon wishlist-icon--productDetail"><path fill="none" /></svg>'
+    expect(isWishlistActive(btn)).toBe(false)
+  })
+
+  test('saved state — Remove item from the wish list', () => {
+    const btn = document.createElement('button')
+    btn.setAttribute('data-qa-action', 'add-to-wishlist')
+    btn.setAttribute('aria-label', 'Remove item from the wish list')
+    expect(isWishlistActive(btn)).toBe(true)
+  })
+
+  test('logical state survives when DOM detection stays inactive', () => {
+    const url = 'https://www.zara.com/uk/en/product/test-shirt'
+    clearZaraLogicalWishlistState(url)
+
+    const btn = document.createElement('button')
+    btn.setAttribute('data-qa-action', 'add-to-wishlist')
+    btn.setAttribute('aria-label', 'Add item to the wish list')
+    btn.innerHTML =
+      '<svg class="wishlist-icon wishlist-icon--productDetail"><path fill="none" /></svg>'
+
+    expect(resolveZaraWasSaved(url, 'outline-sig', btn)).toBe(false)
+
+    applyZaraWishlistToggle(url, 'wishlist_add', 'outline-sig', 'filled-sig')
+    expect(getZaraLogicalWishlistState(url)).toBe(true)
+    expect(resolveZaraWasSaved(url, 'filled-sig', btn)).toBe(true)
+
+    applyZaraWishlistToggle(url, 'wishlist_remove', 'filled-sig', 'outline-sig')
+    expect(getZaraLogicalWishlistState(url)).toBe(false)
+    expect(resolveZaraWasSaved(url, 'outline-sig', btn)).toBe(false)
+
+    clearZaraLogicalWishlistState(url)
+  })
+
+  test('click intent uses inverse of saved state', () => {
+    expect(inferZaraClickAction(false)).toBe('wishlist_add')
+    expect(inferZaraClickAction(true)).toBe('wishlist_remove')
+  })
+
+  test('findWishlistButton matches click on bookmark SVG', () => {
+    document.body.innerHTML = `
+      <button
+        class="wishlist-bookmark add-item-to-wishlist-button"
+        data-qa-action="add-to-wishlist"
+        aria-label="Add item to the wish list"
+      >
+        <svg class="wishlist-icon wishlist-icon--productDetail"><path /></svg>
+      </button>
+    `
+    const path = document.querySelector('svg path')!
+    expect(findWishlistButton(path, 'www.zara.com')).not.toBeNull()
+    expect(findWishlistButton(path, 'www.zara.com')?.getAttribute('data-qa-action')).toBe(
+      'add-to-wishlist'
+    )
+    document.body.innerHTML = ''
+  })
+
+  test('queryWishlistButtons finds Zara bookmark button', () => {
+    document.body.innerHTML = `
+      <button data-qa-action="add-to-wishlist" class="add-item-to-wishlist-button"></button>
+      <button aria-label="Add to wishlist">Wrong site pattern</button>
+    `
+    const buttons = queryWishlistButtons('www.zara.com')
+    expect(buttons).toHaveLength(1)
+    expect(buttons[0]?.getAttribute('data-qa-action')).toBe('add-to-wishlist')
     document.body.innerHTML = ''
   })
 })
