@@ -24,10 +24,13 @@ lib/capture/page-controller.ts     ← lifecycle (start / stop / SPA reset)
         └── lib/events.ts                       ← dwell, scroll, wishlist
 
 lib/sites/adapters/index.ts          ← register per-retailer hooks
-        └── lib/sites/cos/material.ts ← example: 2-step drawer flow
+        ├── lib/sites/cos/            ← material passive watch, engagement, wishlist
+        ├── lib/sites/asos/           ← engagement
+        ├── lib/sites/net-a-porter/   ← engagement
+        └── lib/sites/zara/           ← engagement, wishlist
 
 lib/extractor.ts + lib/dom-extractor.ts   ← product fields (shared)
-lib/wishlist.ts                             ← wishlist (→ sites/asos later)
+lib/wishlist.ts                             ← wishlist routing → sites/cos, sites/zara
 
 background.ts                        ← session storage from messages
 popup.tsx                            ← reads session
@@ -39,16 +42,18 @@ See `types/capture-events.ts` for the full taxonomy:
 
 | Phase | Events |
 |-------|--------|
-| **Live now** | `page_view`, `PRODUCT_CAPTURED`, dwell/scroll milestones, wishlist add/remove |
-| **Next** | `review_section_view`, `size_guide_view`, `material_section_view` |
-| **Later** | `add_to_cart`, `purchase_confirmed`, `return_initiated` |
+| **Live now** | `PRODUCT_CAPTURED`, dwell/scroll milestones, wishlist add/remove, `SECTION_ENGAGEMENT` (details, materials, size guide, reviews) |
+| **Next** | `size_selected`, `colour_selected`, `tab_open_count`, API sync to Supabase |
+| **Later** | `add_to_cart`, `purchase_confirmed`, `cart_abandon`, `return_initiated` |
 
 Flow today:
 
 ```text
 ProductPageController.start()
-  → captureProduct() → sendProductCaptured()
+  → startEngagementTracking()     ← attaches immediately (lazy product getter)
+  → captureProduct() (+ retry)    → sendProductCaptured()
   → trackers → sendDwellMilestone / sendScrollMilestone / sendWishlist*
+  → engagement clicks → sendSectionEngagement
   → background → ShopperSession in chrome.storage.local
 ```
 
@@ -82,7 +87,10 @@ watchMaterialReveal: startCosMaterialPassiveWatch,
 
 Register in `lib/sites/adapters/index.ts`. Use `startEngagementTracking` separately to log intentional section clicks for segmentation.
 
-### 4. Tests
+### 5. Wishlist (if toggle is unreliable)
+If the retailer keeps `aria-label` unchanged or re-mounts the button (COS, Zara), add URL-scoped **logical state** in `lib/sites/<brand>/wishlist.ts` — see COS and Zara modules.
+
+### 6. Tests
 Add fixtures under `lib/__tests__/fixtures/` and tests next to the site module.
 
 ## Class vs modules?
@@ -106,5 +114,7 @@ We use **`ProductPageController`** only for orchestration — not one class per 
 | `lib/capture/message-handler.ts` | `GET_PRODUCT` / `GET_SESSION` for popup |
 | `lib/sites/types.ts` | `SiteAdapter` interface |
 | `lib/sites/registry.ts` | Hostname helpers, `FASHION_DOMAINS` |
-| `lib/sites/adapters/index.ts` | Adapter registry |
-| `types/capture-events.ts` | Event type taxonomy |
+| `lib/sites/adapters/index.ts` | Adapter registry (COS, NAP, ASOS, Zara) |
+| `lib/sites/*/engagement.ts` | Per-retailer section click tracking |
+| `lib/sites/*/wishlist.ts` | Per-retailer wishlist when DOM is unreliable |
+| `types/capture-events.ts` | Event type taxonomy (Notion-aligned) |

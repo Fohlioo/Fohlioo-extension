@@ -20,6 +20,10 @@ export type SiteAdapter = {
   extractMaterial?: () => string | null
   /** Passive DOM watch when material is hidden until shopper opens a section */
   watchMaterialReveal?: (onCaptured: () => void) => () => void
-  /** Track intentional shopper clicks on PDP sections — segmentation only */
-  startEngagementTracking?: (product: ProductData) => () => void
+  /**
+   * Track intentional shopper clicks on PDP sections — segmentation only.
+   * Receives a getter so the listener attaches immediately and resolves the
+   * freshest product at click time (PDPs hydrate after the script runs).
+   */
+  startEngagementTracking?: (getProduct: () => ProductData) => () => void
 }

@@ -23,7 +23,12 @@ Jargon used in this codebase, explained simply.
 | **chrome.storage.local** | Extension’s private persistent key-value store in the browser. |
 | **sendMessage** | Chrome API to pass JSON between extension parts. |
 | **GET_SESSION** | Popup → content script request for session + live metrics. |
-| **PRODUCT_CAPTURED** | Content script → background “here is the product on this page”. |
+| `PRODUCT_CAPTURED` | Content script → background “here is the product on this page”. |
+| **SECTION_ENGAGEMENT** | Content script → background when shopper opens a PDP section (size guide, materials, etc.). |
+| **SiteAdapter** | Per-retailer hooks in `lib/sites/adapters/` (engagement, material watch). |
+| **Logical wishlist state** | URL-scoped saved/unsaved when DOM detection fails (COS, Zara). |
+| **Engagement section** | `details` \| `materials` \| `size_guide` \| `reviews` — maps to session event types. |
+| **Sticky fields** | Material/sizes kept after drawer closes (`product-merge.ts`). |
 | **Hydration** | React finishing rendering controls (e.g. size buttons) after first paint. |
 | **Fixture** | Saved HTML/JSON snippet used in unit tests. |
 | **Vitest** | Test runner (like Jest) for TypeScript. |

@@ -8,7 +8,7 @@ This page walks through **one complete scenario**: you open a product on ASOS, s
 
 Chrome loads the page. Because the URL matches `config.matches` in `contents/capture.ts`, our **content script** runs automatically.
 
-At the bottom of `capture.ts`, `capturePageView()` runs immediately — and again after SPA navigation (Zara/ASOS change URL without full reload).
+At the bottom of `capture.ts`, `startCaptureWithRetry()` runs immediately — and again after SPA navigation (Zara/ASOS change URL without full reload). React PDPs may need several retries before `captureProduct()` succeeds.
 
 ### 2. Product extraction
 
@@ -45,11 +45,12 @@ Still in the content script, on the same page view:
 
 | Tracker | File | What it does |
 |---------|------|--------------|
-| Dwell | `lib/events.ts` → `startDwellTracking` | Counts visible time; fires at 15s, 30s, 60s, 90s, 120s, 180s |
-| Scroll | `lib/events.ts` → `startScrollTracking` | Tracks max scroll %; fires at 25%, 50%, 75%, 90% |
-| Wishlist | `lib/events.ts` → `startWishlistTracking` | Watches save/heart buttons via `lib/wishlist.ts` |
+| Engagement | `lib/sites/*/engagement.ts` | Section clicks → `SECTION_ENGAGEMENT` |
+| Dwell | `lib/events.ts` → `startDwellTracking` | Counts visible time; fires at 15s–180s |
+| Scroll | `lib/events.ts` → `startScrollTracking` | Tracks max scroll %; fires at 25%–90% |
+| Wishlist | `lib/events.ts` → `startWishlistTracking` | Save/heart via `lib/wishlist.ts` + site modules |
 
-Each milestone sends a message (`DWELL_MILESTONE`, `SCROLL_MILESTONE`, `WISHLIST_ADD`, etc.) to **background**.
+Each milestone sends a message (`DWELL_MILESTONE`, `SCROLL_MILESTONE`, `WISHLIST_*`, `SECTION_ENGAGEMENT`) to **background**.
 
 Background calls `applySessionUpdate()` which:
 - Appends to `recentEvents` (max 10)
@@ -74,7 +75,7 @@ When the popup asks for session data, we merge stored + live so the UI feels rea
 
 ### 7. You navigate to another product (SPA)
 
-`capture.ts` watches `location.href` via `MutationObserver`. On change, after 800ms (React render time), `capturePageView()` runs again — fresh product, reset live metrics, new tracking.
+`capture.ts` watches `location.href` via `MutationObserver`. On change, after 800ms, `startCaptureWithRetry()` runs — `ProductPageController.stop()` then `start()` for fresh product and trackers.
 
 ---
 

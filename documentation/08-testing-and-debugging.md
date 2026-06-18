@@ -40,9 +40,25 @@ Tests live in `lib/__tests__/`. They do **not** load the full Chrome extension �
 |-----------|--------|
 | `extractor.test.ts` | JSON-LD parsing |
 | `dom-extractor.test.ts` | DOM sizes, merge |
-| `wishlist.test.ts` | Button selectors, ASOS/Arket state |
+| `wishlist.test.ts` | ASOS, COS, Zara wishlist |
+| `*-engagement.test.ts` | ASOS, NAP, Zara section clicks |
+| `product-merge.test.ts` | Sticky product fields |
+
+**Current count:** 78 tests (`yarn test --run`).
 
 **Fixtures:** `lib/__tests__/fixtures/` — paste real retailer snippets when adding sites.
+
+---
+
+## Extension reload (important)
+
+If `yarn dev` shows **`Build failed`** or **`Expression expected`**, Chrome may be running a **stale bundle**. Fixes:
+
+1. Run `yarn build` to confirm clean compile
+2. **Reload** extension at `chrome://extensions`
+3. **Hard refresh** the retailer tab (Cmd+Shift+R)
+
+Content scripts do not always hot-swap after a failed build — symptoms look like “tracking never works”.
 
 ---
 

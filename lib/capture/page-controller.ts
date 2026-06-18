@@ -27,19 +27,27 @@ type Cleanup = () => void
 export class ProductPageController {
   private cleanups: Cleanup[] = []
   private lastPublished = { sizes: '', material: '' }
+  private currentProduct: ProductData | null = null
 
   stop (): void {
     this.cleanups.forEach((c) => c())
     this.cleanups = []
+    this.currentProduct = null
     resetLiveMetrics()
   }
 
   start (): ProductData | null {
     this.stop()
 
+    // Engagement (section clicks) attaches first and resolves the product
+    // lazily — PDPs hydrate after the script runs, so we must not gate it on
+    // a successful first capture.
+    this.startEngagementTracking()
+
     const product = captureProduct()
     if (!product) return null
 
+    this.currentProduct = product
     this.publishProduct(product)
     this.lastPublished = {
       sizes: product.sizes.join('|'),
@@ -48,9 +56,36 @@ export class ProductPageController {
 
     this.startHydration(product)
     this.startBehaviourTrackers(product)
-    this.startEngagementTracking(product)
 
     return product
+  }
+
+  /** Minimal product when the page has not yet hydrated a full capture */
+  private resolveProduct (): ProductData {
+    if (this.currentProduct) return this.currentProduct
+
+    const fresh = captureProduct()
+    if (fresh) {
+      this.currentProduct = fresh
+      return fresh
+    }
+
+    return {
+      name: document.title || null,
+      brand: null,
+      price: null,
+      originalPrice: null,
+      currency: null,
+      category: null,
+      colour: null,
+      material: null,
+      images: null,
+      availability: 'unknown',
+      sizes: [],
+      extractionSource: 'dom',
+      url: window.location.href,
+      capturedAt: new Date().toISOString(),
+    }
   }
 
   private publishProduct (product: ProductData): void {
@@ -70,6 +105,7 @@ export class ProductPageController {
     if (sizesChanged) this.lastPublished.sizes = sizeKey
     if (materialChanged) this.lastPublished.material = materialKey
 
+    this.currentProduct = product
     this.publishProduct(product)
   }
 
@@ -124,10 +160,12 @@ export class ProductPageController {
     )
   }
 
-  private startEngagementTracking (product: ProductData): void {
+  private startEngagementTracking (): void {
     const adapter = getSiteAdapter(window.location.hostname)
     if (adapter?.startEngagementTracking) {
-      this.cleanups.push(adapter.startEngagementTracking(product))
+      this.cleanups.push(
+        adapter.startEngagementTracking(() => this.resolveProduct())
+      )
     }
   }
 
