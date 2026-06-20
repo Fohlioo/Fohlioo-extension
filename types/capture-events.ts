@@ -2,9 +2,9 @@
  * Event taxonomy — aligned with backend `events` table and
  * Extension Data Capture / Segmentation Engine (Notion spec).
  *
- * Phase 1 (live in extension): product, dwell, scroll, wishlist, section engagement
- * Phase 1 (not yet): API sync, size/colour selection, tab/return counts
- * Phase 2: cart, purchase, cart abandon, return initiated
+ * Phase 1 (live in extension): product, dwell, scroll, wishlist, section engagement, add_to_cart (NAP)
+ * Phase 1 (not yet): API sync, size/colour selection, tab/return counts, cart on other retailers
+ * Phase 2: cart on all retailers, purchase, cart abandon, return initiated
  */
 
 /** Stored in Supabase `events.event_type` — extend as features ship */
@@ -31,12 +31,14 @@ export type BehaviourMessageType =
   | 'DWELL_MILESTONE'
   | 'SCROLL_MILESTONE'
   | 'SECTION_ENGAGEMENT'
+  | 'ADD_TO_CART'
 
 /** Popup session feed — mirrors shopper-facing labels */
 export type SessionFeedEventType =
   | 'page_view'
   | 'wishlist_add'
   | 'wishlist_remove'
+  | 'add_to_cart'
   | 'dwell_milestone'
   | 'scroll_milestone'
   | 'details_section_view'

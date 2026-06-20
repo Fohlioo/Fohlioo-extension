@@ -1,4 +1,4 @@
-/** Hostnames with content-script matches — keep in sync with `contents/capture.ts` */
+/** Hostnames with content-script matches — keep in sync with `lib/sites/content-script-matches.ts` */
 export const FASHION_DOMAINS = [
   'cos.com',
   'net-a-porter.com',

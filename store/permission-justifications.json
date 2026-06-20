@@ -1,0 +1,3 @@
+{
+  "tabs": "Fohlioo measures how many supported fashion retailer tabs a shopper has open at once (tab_open_count). This comparison-shopping signal is required for shopper segmentation (Investment Dresser vs Trend Chaser). The extension only queries tabs whose URLs match our whitelisted fashion retailer host patterns via chrome.tabs.query({ url: [...] }); it never enumerates or reads URLs from non-fashion sites."
+}

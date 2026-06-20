@@ -20,6 +20,7 @@ type SessionEventType =
   | 'page_view'
   | 'wishlist_add'
   | 'wishlist_remove'
+  | 'add_to_cart'
   | 'dwell_milestone'
   | 'scroll_milestone'
   | 'details_section_view'
@@ -36,6 +37,8 @@ interface SessionEvent {
 
 interface ShopperSession {
   product: ProductData
+  /** Total visits to this product URL (including the current one) */
+  returnVisitCount: number
   /** Highest dwell milestone reached (ms) */
   dwellMs: number
   /** Max scroll depth reached (%) */

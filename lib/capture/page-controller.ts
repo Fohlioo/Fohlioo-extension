@@ -43,12 +43,13 @@ export class ProductPageController {
     // lazily — PDPs hydrate after the script runs, so we must not gate it on
     // a successful first capture.
     this.startEngagementTracking()
+    this.startCartTracking()
 
     const product = captureProduct()
     if (!product) return null
 
     this.currentProduct = product
-    this.publishProduct(product)
+    this.publishProduct(product, { recordVisit: true })
     this.lastPublished = {
       sizes: product.sizes.join('|'),
       material: product.material ?? '',
@@ -88,8 +89,11 @@ export class ProductPageController {
     }
   }
 
-  private publishProduct (product: ProductData): void {
-    sendProductCaptured(product)
+  private publishProduct (
+    product: ProductData,
+    options: { recordVisit?: boolean } = {}
+  ): void {
+    sendProductCaptured(product, options)
   }
 
   private onProductUpdated (product: ProductData): void {
@@ -165,6 +169,15 @@ export class ProductPageController {
     if (adapter?.startEngagementTracking) {
       this.cleanups.push(
         adapter.startEngagementTracking(() => this.resolveProduct())
+      )
+    }
+  }
+
+  private startCartTracking (): void {
+    const adapter = getSiteAdapter(window.location.hostname)
+    if (adapter?.startCartTracking) {
+      this.cleanups.push(
+        adapter.startCartTracking(() => this.resolveProduct())
       )
     }
   }

@@ -3,9 +3,16 @@ import type { EngagementSection } from '../sites/engagement-section'
 import { fohliooLog } from '../debug'
 
 /** All extension → background payloads go through here */
-export function sendProductCaptured (product: ProductData): void {
+export function sendProductCaptured (
+  product: ProductData,
+  options: { recordVisit?: boolean } = {}
+): void {
   chrome.runtime
-    .sendMessage({ type: 'PRODUCT_CAPTURED', data: product })
+    .sendMessage({
+      type: 'PRODUCT_CAPTURED',
+      data: product,
+      recordVisit: options.recordVisit,
+    })
     .catch(() => {
       // Background unavailable during extension reload
     })
@@ -48,4 +55,9 @@ export function sendSectionEngagement (
   chrome.runtime
     .sendMessage({ type: 'SECTION_ENGAGEMENT', data: product, section, label })
     .catch(() => {})
+}
+
+export function sendAddToCart (product: ProductData): void {
+  fohliooLog('message', 'ADD_TO_CART → background', { name: product.name })
+  chrome.runtime.sendMessage({ type: 'ADD_TO_CART', data: product }).catch(() => {})
 }

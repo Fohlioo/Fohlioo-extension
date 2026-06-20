@@ -3,6 +3,8 @@ import type { ProductData } from '../interface'
 export type ProductCapturedMessage = {
   type: 'PRODUCT_CAPTURED'
   data: ProductData
+  /** True on a genuine page load — false on sticky hydration updates */
+  recordVisit?: boolean
 }
 
 export type GetProductMessage = {
@@ -38,6 +40,11 @@ export type SectionEngagementMessage = {
   label: string
 }
 
+export type AddToCartMessage = {
+  type: 'ADD_TO_CART'
+  data: ProductData
+}
+
 export type GetTabCountMessage = {
   type: 'GET_TAB_COUNT'
 }
@@ -64,6 +71,7 @@ export type ExtensionMessage =
   | DwellMilestoneMessage
   | ScrollMilestoneMessage
   | SectionEngagementMessage
+  | AddToCartMessage
   | GetTabCountMessage
 
 export type GetProductResponse = {

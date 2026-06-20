@@ -7,6 +7,8 @@ import { captureProduct } from '~lib/capture/product-capture'
 
 export { captureProduct }
 
+// Plasmo requires a literal `matches` array here (static analysis at build time).
+// Keep in sync with `lib/sites/content-script-matches.ts`.
 export const config: PlasmoCSConfig = {
   matches: [
     'https://*.cos.com/*',
