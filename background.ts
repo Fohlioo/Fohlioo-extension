@@ -1,4 +1,5 @@
 import type {
+  AddToCartMessage,
   DwellMilestoneMessage,
   ExtensionMessage,
   GetTabCountResponse,
@@ -16,7 +17,9 @@ import {
   setShopperSession,
 } from './lib/session'
 import { isFashionSite } from './lib/sites/registry'
+import { FASHION_TAB_QUERY_URL_PATTERNS } from './lib/sites/content-script-matches'
 import { mergeStickyProductFields } from './lib/product-merge'
+import { recordProductVisit } from './lib/visit-history'
 
 const SECTION_EVENT_TYPE: Record<
   SectionEngagementMessage['section'],
@@ -32,12 +35,12 @@ chrome.runtime.onMessage.addListener(
   (message: ExtensionMessage, _sender, sendResponse) => {
     if (message.type === 'PRODUCT_CAPTURED') {
       getShopperSession()
-        .then((existing) => {
+        .then(async (existing) => {
           const sameProduct =
             existing?.product.url === message.data.url &&
             existing?.product.name === message.data.name
 
-          if (sameProduct && existing) {
+          if (sameProduct && existing && !message.recordVisit) {
             return setShopperSession({
               ...existing,
               product: mergeStickyProductFields(
@@ -45,6 +48,22 @@ chrome.runtime.onMessage.addListener(
                 message.data
               ),
               updatedAt: new Date().toISOString(),
+            })
+          }
+
+          if (message.recordVisit) {
+            const returnVisitCount = await recordProductVisit(message.data.url)
+            const mergedProduct =
+              sameProduct && existing
+                ? mergeStickyProductFields(existing.product, message.data)
+                : message.data
+
+            return setShopperSession({
+              ...buildInitialSession(mergedProduct, { returnVisitCount }),
+              wishlistStatus:
+                sameProduct && existing
+                  ? existing.wishlistStatus
+                  : 'unknown',
             })
           }
 
@@ -73,6 +92,15 @@ chrome.runtime.onMessage.addListener(
         msg.data,
         createSessionEvent('wishlist_remove', 'Removed from wishlist'),
         { wishlistStatus: 'not_saved' }
+      ).catch(() => {})
+      return false
+    }
+
+    if (message.type === 'ADD_TO_CART') {
+      const msg = message as AddToCartMessage
+      applySessionUpdate(
+        msg.data,
+        createSessionEvent('add_to_cart', 'Added to bag')
       ).catch(() => {})
       return false
     }
@@ -124,7 +152,7 @@ chrome.runtime.onMessage.addListener(
     }
 
     if (message.type === 'GET_TAB_COUNT') {
-      chrome.tabs.query({}, (tabs) => {
+      chrome.tabs.query({ url: [...FASHION_TAB_QUERY_URL_PATTERNS] }, (tabs) => {
         const count = tabs.filter(
           (tab) => tab.url && isFashionSite(tab.url)
         ).length

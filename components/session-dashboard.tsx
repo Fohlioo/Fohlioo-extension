@@ -154,6 +154,14 @@ export function SessionDashboard ({ session }: SessionDashboardProps) {
             </div>
           )}
           <div className="detail-grid__item">
+            <dt>Visit count</dt>
+            <dd>
+              {session.returnVisitCount === 1
+                ? 'First visit'
+                : `${session.returnVisitCount} visits`}
+            </dd>
+          </div>
+          <div className="detail-grid__item">
             <dt>Availability</dt>
             <dd>{availability.label}</dd>
           </div>

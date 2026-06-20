@@ -36,6 +36,22 @@
     "vitest": "^4.1.8"
   },
   "manifest": {
+    "host_permissions": [
+      "https://*.cos.com/*",
+      "https://*.net-a-porter.com/*",
+      "https://*.asos.com/*",
+      "https://*.zara.com/*",
+      "https://*.toteme-studio.com/*",
+      "https://*.reiss.com/*",
+      "https://*.stories.com/*",
+      "https://*.arket.com/*",
+      "https://*.hm.com/*",
+      "https://*.reebok.eu/*",
+      "https://*.reebok.com/*",
+      "https://*.underarmour.com/*",
+      "https://*.puma.com/*",
+      "https://*.underarmour.co.uk/*"
+    ],
     "web_accessible_resources": [
       {
         "resources": [
@@ -44,14 +60,28 @@
           "*.css"
         ],
         "matches": [
-          "<all_urls>"
+          "https://*.cos.com/*",
+          "https://*.net-a-porter.com/*",
+          "https://*.asos.com/*",
+          "https://*.zara.com/*",
+          "https://*.toteme-studio.com/*",
+          "https://*.reiss.com/*",
+          "https://*.stories.com/*",
+          "https://*.arket.com/*",
+          "https://*.hm.com/*",
+          "https://*.reebok.eu/*",
+          "https://*.reebok.com/*",
+          "https://*.underarmour.com/*",
+          "https://*.puma.com/*",
+          "https://*.underarmour.co.uk/*"
         ]
       }
     ],
     "permissions": [
       "activeTab",
       "scripting",
-      "storage"
+      "storage",
+      "tabs"
     ]
   }
 }

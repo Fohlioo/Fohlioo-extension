@@ -26,4 +26,6 @@ export type SiteAdapter = {
    * freshest product at click time (PDPs hydrate after the script runs).
    */
   startEngagementTracking?: (getProduct: () => ProductData) => () => void
+  /** Track shopper add-to-cart / add-to-bag clicks — site-specific selectors */
+  startCartTracking?: (getProduct: () => ProductData) => () => void
 }

@@ -9,6 +9,7 @@ type LogCategory =
   | 'dwell'
   | 'scroll'
   | 'wishlist'
+  | 'cart'
   | 'spa'
   | 'sizes'
   | 'message'
@@ -18,6 +19,7 @@ const STYLES: Record<LogCategory, string> = {
   dwell: 'color:#059669;font-weight:bold',
   scroll: 'color:#0891b2;font-weight:bold',
   wishlist: 'color:#db2777;font-weight:bold',
+  cart: 'color:#111111;font-weight:bold',
   spa: 'color:#d97706;font-weight:bold',
   sizes: 'color:#7c3aed;font-weight:bold',
   message: 'color:#64748b;font-weight:bold',

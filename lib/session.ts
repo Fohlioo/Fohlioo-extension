@@ -5,6 +5,7 @@ import type {
   ShopperSession,
 } from '../interface'
 import { mergeStickyProductFields } from './product-merge'
+import { pageViewLabel } from './visit-history'
 
 export const SESSION_KEY = 'shopperSession'
 export const LATEST_PRODUCT_KEY = 'latestProduct'
@@ -24,14 +25,24 @@ export function createSessionEvent (
   }
 }
 
-export function buildInitialSession (product: ProductData): ShopperSession {
+export function buildInitialSession (
+  product: ProductData,
+  options: { returnVisitCount?: number } = {}
+): ShopperSession {
+  const returnVisitCount = options.returnVisitCount ?? 1
+
   return {
     product,
+    returnVisitCount,
     dwellMs: 0,
     scrollDepthPct: 0,
     wishlistStatus: 'unknown',
     recentEvents: [
-      createSessionEvent('page_view', 'Product page opened'),
+      createSessionEvent(
+        'page_view',
+        pageViewLabel(returnVisitCount),
+        returnVisitCount
+      ),
     ],
     updatedAt: new Date().toISOString(),
   }
