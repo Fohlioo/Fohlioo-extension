@@ -61,3 +61,10 @@ export function sendAddToCart (product: ProductData): void {
   fohliooLog('message', 'ADD_TO_CART → background', { name: product.name })
   chrome.runtime.sendMessage({ type: 'ADD_TO_CART', data: product }).catch(() => {})
 }
+
+export function sendRemoveFromCart (product: ProductData): void {
+  fohliooLog('message', 'REMOVE_FROM_CART → background', { name: product.name })
+  chrome.runtime
+    .sendMessage({ type: 'REMOVE_FROM_CART', data: product })
+    .catch(() => {})
+}

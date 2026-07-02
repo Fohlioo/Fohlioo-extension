@@ -3,6 +3,7 @@ import type {
   DwellMilestoneMessage,
   ExtensionMessage,
   GetTabCountResponse,
+  RemoveFromCartMessage,
   ScrollMilestoneMessage,
   SectionEngagementMessage,
   WishlistAddMessage,
@@ -101,6 +102,15 @@ chrome.runtime.onMessage.addListener(
       applySessionUpdate(
         msg.data,
         createSessionEvent('add_to_cart', 'Added to bag')
+      ).catch(() => {})
+      return false
+    }
+
+    if (message.type === 'REMOVE_FROM_CART') {
+      const msg = message as RemoveFromCartMessage
+      applySessionUpdate(
+        msg.data,
+        createSessionEvent('remove_from_cart', 'Removed from bag')
       ).catch(() => {})
       return false
     }

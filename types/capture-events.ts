@@ -2,7 +2,7 @@
  * Event taxonomy — aligned with backend `events` table and
  * Extension Data Capture / Segmentation Engine (Notion spec).
  *
- * Phase 1 (live in extension): product, dwell, scroll, wishlist, section engagement, add_to_cart (NAP)
+ * Phase 1 (live in extension): product, dwell, scroll, wishlist, section engagement, COS + NAP + Zara + ASOS cart add
  * Phase 1 (not yet): API sync, size/colour selection, tab/return counts, cart on other retailers
  * Phase 2: cart on all retailers, purchase, cart abandon, return initiated
  */
@@ -19,6 +19,7 @@ export type BackendEventType =
   | 'review_section_view'
   | 'size_guide_view'
   | 'add_to_cart'
+  | 'remove_from_cart'
   | 'cart_abandon'
   | 'purchase_confirmed'
   | 'return_initiated'
@@ -32,6 +33,7 @@ export type BehaviourMessageType =
   | 'SCROLL_MILESTONE'
   | 'SECTION_ENGAGEMENT'
   | 'ADD_TO_CART'
+  | 'REMOVE_FROM_CART'
 
 /** Popup session feed — mirrors shopper-facing labels */
 export type SessionFeedEventType =
@@ -39,6 +41,7 @@ export type SessionFeedEventType =
   | 'wishlist_add'
   | 'wishlist_remove'
   | 'add_to_cart'
+  | 'remove_from_cart'
   | 'dwell_milestone'
   | 'scroll_milestone'
   | 'details_section_view'

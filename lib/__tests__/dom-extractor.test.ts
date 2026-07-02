@@ -110,6 +110,33 @@ describe('extractFromDom', () => {
     expect(result.sizes).toEqual(['W28 L32', 'W29 L32', 'W33 L32'])
   })
 
+  test('ignores country/currency market selector options (Toteme-style)', () => {
+    mockDom(
+      `
+      <div class="size-selector" aria-label="Size">
+        <button type="button">35</button>
+        <button type="button">36</button>
+        <button type="button">37</button>
+        <button type="button">38</button>
+        <button type="button">39</button>
+        <button type="button">40</button>
+        <button type="button">41</button>
+        <button type="button">42</button>
+      </div>
+      <select id="country-selector" name="country" aria-label="Country">
+        <option value="AF">Afghanistan (EUR)</option>
+        <option value="AL">Albania (EUR)</option>
+        <option value="AU">Australia (AUD)</option>
+        <option value="BE">Belgium (EUR)</option>
+      </select>
+    `,
+      'www.toteme.com'
+    )
+
+    const result = extractFromDom()
+    expect(result.sizes).toEqual(['35', '36', '37', '38', '39', '40', '41', '42'])
+  })
+
   test('extracts product name and price from DOM', () => {
     mockDom(`
       <h1 class="product-name">BOUCLÉ-KNIT HENLEY T-SHIRT</h1>

@@ -1,4 +1,5 @@
 import type { SiteAdapter } from '../types'
+import { startCosCartTracking } from '../cos/cart'
 import { startCosEngagementTracking } from '../cos/engagement'
 import {
   extractCosComposition,
@@ -12,4 +13,5 @@ export const cosAdapter: SiteAdapter = {
   extractMaterial: extractCosComposition,
   watchMaterialReveal: startCosMaterialPassiveWatch,
   startEngagementTracking: startCosEngagementTracking,
+  startCartTracking: startCosCartTracking,
 }
