@@ -86,6 +86,12 @@ const SIZE_NUMERIC = /^\d{1,2}(\.\d)?$/
 const SIZE_NOISE =
   /size guide|select size|choose size|find your size|add to|sold out|notify|wishlist|bag|cart/i
 
+/** Market / shipping country dropdowns (e.g. "Afghanistan (EUR)") */
+const SIZE_COUNTRY_CURRENCY = /\([A-Z]{3}\)$/
+
+const SIZE_CONTEXT_EXCLUDE =
+  /country|locale|region|currency|market|language|shipping|territory|nation/i
+
 const NAME_SELECTORS = [
   'h1[data-product-name]',
   'h1.product-name',
@@ -233,9 +239,28 @@ function isValidSizeLabel (label: string): boolean {
   const trimmed = label.trim()
   if (!trimmed || trimmed.length > 12) return false
   if (SIZE_NOISE.test(trimmed)) return false
+  if (SIZE_COUNTRY_CURRENCY.test(trimmed)) return false
   if (SIZE_LABEL.test(trimmed)) return true
   if (SIZE_NUMERIC.test(trimmed)) return true
   if (SIZE_WAIST_LENGTH.test(trimmed)) return true
+  return false
+}
+
+function isInsideExcludedSizeContext (el: Element): boolean {
+  let node: Element | null = el
+  while (node) {
+    const hints = [
+      node.id,
+      node.className?.toString(),
+      node.getAttribute('data-testid'),
+      node.getAttribute('name'),
+      node.getAttribute('aria-label'),
+    ]
+      .filter(Boolean)
+      .join(' ')
+    if (SIZE_CONTEXT_EXCLUDE.test(hints)) return true
+    node = node.parentElement
+  }
   return false
 }
 
@@ -321,7 +346,9 @@ function readSizeFromOption (option: HTMLOptionElement): string | null {
     option.textContent?.trim() ??
     ''
 
-  return normalizeAsosSizeOption(raw)
+  const normalized = normalizeAsosSizeOption(raw)
+  if (!normalized) return null
+  return isValidSizeLabel(normalized) ? normalizeSizeLabel(normalized) : null
 }
 
 /**
@@ -392,6 +419,7 @@ function extractSizesFromDom (): string[] {
   for (const root of roots) {
     for (const selector of optionSelectors) {
       for (const el of root.querySelectorAll(selector)) {
+        if (isInsideExcludedSizeContext(el)) continue
         const size = readSizeFromElement(el)
         if (size) sizes.push(size)
       }
@@ -402,6 +430,7 @@ function extractSizesFromDom (): string[] {
     for (const root of roots) {
       for (const selector of GENERIC_SIZE_OPTION_SELECTORS) {
         for (const el of root.querySelectorAll(selector)) {
+          if (isInsideExcludedSizeContext(el)) continue
           const size = readSizeFromElement(el)
           if (size) sizes.push(size)
         }

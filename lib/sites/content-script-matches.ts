@@ -8,7 +8,7 @@ export const FASHION_CONTENT_SCRIPT_MATCHES = [
   'https://*.net-a-porter.com/*',
   'https://*.asos.com/*',
   'https://*.zara.com/*',
-  'https://*.toteme-studio.com/*',
+  'https://*.toteme.com/*',
   'https://*.reiss.com/*',
   'https://*.stories.com/*',
   'https://*.arket.com/*',

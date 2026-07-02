@@ -561,6 +561,10 @@ body {
   background: var(--accent);
 }
 
+.activity-list__dot--remove_from_cart {
+  background: var(--ink-muted);
+}
+
 .activity-list__dot--dwell_milestone {
   background: var(--indigo);
 }

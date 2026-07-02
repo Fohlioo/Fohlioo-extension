@@ -5,7 +5,7 @@ export const FASHION_DOMAINS = [
   'mrporter.com',
   'asos.com',
   'zara.com',
-  'toteme-studio.com',
+  'toteme.com',
   'reiss.com',
   'stories.com',
   'arket.com',

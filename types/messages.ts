@@ -45,6 +45,11 @@ export type AddToCartMessage = {
   data: ProductData
 }
 
+export type RemoveFromCartMessage = {
+  type: 'REMOVE_FROM_CART'
+  data: ProductData
+}
+
 export type GetTabCountMessage = {
   type: 'GET_TAB_COUNT'
 }
@@ -72,6 +77,7 @@ export type ExtensionMessage =
   | ScrollMilestoneMessage
   | SectionEngagementMessage
   | AddToCartMessage
+  | RemoveFromCartMessage
   | GetTabCountMessage
 
 export type GetProductResponse = {

@@ -26,6 +26,7 @@ type Cleanup = () => void
  */
 export class ProductPageController {
   private cleanups: Cleanup[] = []
+  private siteCleanups: Cleanup[] = []
   private lastPublished = { sizes: '', material: '' }
   private currentProduct: ProductData | null = null
 
@@ -36,14 +37,22 @@ export class ProductPageController {
     resetLiveMetrics()
   }
 
-  start (): ProductData | null {
+  stopAll (): void {
     this.stop()
+    this.siteCleanups.forEach((c) => c())
+    this.siteCleanups = []
+  }
 
-    // Engagement (section clicks) attaches first and resolves the product
-    // lazily — PDPs hydrate after the script runs, so we must not gate it on
-    // a successful first capture.
+  /** Site-wide listeners (cart, engagement) — survives product capture retries */
+  attachSiteTrackers (): void {
+    this.siteCleanups.forEach((c) => c())
+    this.siteCleanups = []
     this.startEngagementTracking()
     this.startCartTracking()
+  }
+
+  start (): ProductData | null {
+    this.stop()
 
     const product = captureProduct()
     if (!product) return null
@@ -167,7 +176,7 @@ export class ProductPageController {
   private startEngagementTracking (): void {
     const adapter = getSiteAdapter(window.location.hostname)
     if (adapter?.startEngagementTracking) {
-      this.cleanups.push(
+      this.siteCleanups.push(
         adapter.startEngagementTracking(() => this.resolveProduct())
       )
     }
@@ -176,7 +185,7 @@ export class ProductPageController {
   private startCartTracking (): void {
     const adapter = getSiteAdapter(window.location.hostname)
     if (adapter?.startCartTracking) {
-      this.cleanups.push(
+      this.siteCleanups.push(
         adapter.startCartTracking(() => this.resolveProduct())
       )
     }

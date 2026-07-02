@@ -21,6 +21,7 @@ type SessionEventType =
   | 'wishlist_add'
   | 'wishlist_remove'
   | 'add_to_cart'
+  | 'remove_from_cart'
   | 'dwell_milestone'
   | 'scroll_milestone'
   | 'details_section_view'

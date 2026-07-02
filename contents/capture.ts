@@ -15,7 +15,7 @@ export const config: PlasmoCSConfig = {
     'https://*.net-a-porter.com/*',
     'https://*.asos.com/*',
     'https://*.zara.com/*',
-    'https://*.toteme-studio.com/*',
+    'https://*.toteme.com/*',
     'https://*.reiss.com/*',
     'https://*.stories.com/*',
     'https://*.arket.com/*',
@@ -34,6 +34,12 @@ const CAPTURE_RETRY_MS = 500
 const CAPTURE_RETRY_MAX = 40
 
 /** ASOS and other React PDPs often hydrate after document_idle */
+function beginPageSession (): void {
+  controller.stopAll()
+  controller.attachSiteTrackers()
+  startCaptureWithRetry()
+}
+
 function startCaptureWithRetry (): void {
   try {
     if (controller.start()) return
@@ -65,7 +71,7 @@ try {
     url: window.location.href,
   })
   installCaptureMessageHandler(controller)
-  startCaptureWithRetry()
+  beginPageSession()
 
   let lastUrl = window.location.href
   const navObserver = new MutationObserver(() => {
@@ -75,7 +81,7 @@ try {
     fohliooLog('spa', 'Navigation detected — recapturing in 800ms', {
       url: lastUrl,
     })
-    window.setTimeout(() => startCaptureWithRetry(), 800)
+    window.setTimeout(() => beginPageSession(), 800)
   })
 
   navObserver.observe(document.body, {
